@@ -1,47 +1,136 @@
 "use client"
 
-import { Exchange } from "@/components/exchange"
-import { Sparkles, Zap } from "lucide-react"
+import { Web3Hero } from "@/components/web3-hero"
+import { TokenExchange } from "@/components/token-exchange"
+import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react"
+import { ETH_TO_YIDENG_RATIO } from "@/lib/contract-config"
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="py-12 space-y-16">
-      <section className="text-center space-y-6 max-w-3xl mx-auto">
-        <div className="inline-flex items-center justify-center mb-4">
-          <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-full p-5">
-            <div className="bg-gradient-to-r from-purple-600/30 to-blue-600/30 rounded-full p-4">
-              <Zap className="h-10 w-10 text-purple-400" />
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/90">
+      {/* Hero Section */}
+      <Web3Hero 
+        badge="一灯大学"
+        title1="区块链和Web3"
+        title2="开发的最佳平台"
+        description="学习区块链和Web3开发的最佳在线平台，使用Yideng代币解锁优质课程内容"
+      />
+      
+      {/* Features Section */}
+      <section className="px-4 py-16 md:py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+            在我们的平台上开始您的 Web3 之旅
+          </h2>
+          <p className="text-foreground/40 max-w-2xl mx-auto">
+            通过我们的易灯代币系统，解锁优质课程、获取认证并参与Web3社区
+          </p>
         </div>
-        <h1 className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 animate-gradient">
-          Web3 College
-        </h1>
-        <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-          学习区块链和Web3开发的最佳在线平台，使用Yideng代币解锁优质课程内容
-        </p>
-        <div className="flex justify-center gap-2 pt-4">
-          <div className="h-1 w-20 bg-gradient-to-r from-purple-500 to-transparent rounded-full"></div>
-          <div className="h-1 w-20 bg-gradient-to-r from-transparent to-blue-500 rounded-full"></div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-gradient-to-br from-background/50 to-background/20 p-6 rounded-xl border border-white/[0.05] shadow-sm">
+            <div className="w-12 h-12 bg-indigo-500/10 flex items-center justify-center rounded-lg mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold mb-2">实时学习</h3>
+            <p className="text-foreground/40 mb-4">通过互动课程和实时项目开发，掌握区块链技术的核心概念</p>
+            <Button variant="link" className="px-0 text-indigo-400 hover:text-indigo-300">
+              探索课程 <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="bg-gradient-to-br from-background/50 to-background/20 p-6 rounded-xl border border-white/[0.05] shadow-sm">
+            <div className="w-12 h-12 bg-cyan-500/10 flex items-center justify-center rounded-lg mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-500">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold mb-2">代币经济</h3>
+            <p className="text-foreground/40 mb-4">使用易灯代币购买课程、获取认证和享受平台特权</p>
+            <Button variant="link" className="px-0 text-cyan-400 hover:text-cyan-300">
+              了解代币 <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="bg-gradient-to-br from-background/50 to-background/20 p-6 rounded-xl border border-white/[0.05] shadow-sm">
+            <div className="w-12 h-12 bg-purple-500/10 flex items-center justify-center rounded-lg mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold mb-2">认证证书</h3>
+            <p className="text-foreground/40 mb-4">完成课程后获取区块链上的认证证书，证明您的技能</p>
+            <Button variant="link" className="px-0 text-purple-400 hover:text-purple-300">
+              查看认证 <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </section>
       
-      <section className="py-8 relative">
-        {/* 背景装饰 */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl -z-10"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -z-10"></div>
-        
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-center mb-10 gap-3">
-            <Sparkles className="h-6 w-6 text-purple-400" />
-            <h2 className="text-2xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
-              获取Yideng代币
+      {/* Token Exchange Section */}
+      <section className="px-4 py-16 md:py-24">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+              ETH 兑换 YIDENG 代币
             </h2>
-            <Sparkles className="h-6 w-6 text-blue-400" />
+            <p className="text-foreground/40 max-w-2xl mx-auto">
+              使用以太币兑换YIDENG代币，以 1:{ETH_TO_YIDENG_RATIO} 的比例获得更多平台权益
+            </p>
           </div>
-          <Exchange />
+          
+          <TokenExchange className="mx-auto" />
         </div>
       </section>
+      
+      {/* Footer */}
+      <footer className="px-4 py-8 md:py-12 border-t border-white/[0.05]">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div>
+            <h3 className="font-bold text-lg mb-4">易灯学院</h3>
+            <p className="text-foreground/40 text-sm">
+              区块链和Web3开发的前沿教育平台
+            </p>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold mb-4">产品</h4>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">课程</a></li>
+              <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">认证</a></li>
+              <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">代币</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold mb-4">资源</h4>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">文档</a></li>
+              <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">博客</a></li>
+              <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">社区</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold mb-4">联系我们</h4>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">关于我们</a></li>
+              <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">联系方式</a></li>
+              <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">支持</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="mt-12 text-center text-sm text-foreground/40">
+          &copy; {new Date().getFullYear()} 易灯学院. 保留所有权利.
+        </div>
+      </footer>
     </div>
   )
 }
