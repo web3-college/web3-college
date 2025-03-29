@@ -1,16 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { RainbowProvider } from "@/providers/rainbow-provider";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import '@rainbow-me/rainbowkit/styles.css';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,10 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body>
+        <RainbowProvider>
+          {children}
+        </RainbowProvider>
       </body>
     </html>
   );
