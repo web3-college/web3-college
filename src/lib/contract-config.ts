@@ -4,14 +4,17 @@ import {
   CourseCertificate__factory 
 } from '@/types/contracts/factories'
 
-export const ETH_TO_YIDENG_RATIO = 1000
+// 代币兑换比例: 1 ETH = 100 YIDENG
+export const ETH_TO_YIDENG_RATIO = 1000;
 
-// 合约地址
-export const CONTRACTS = {
-  TOKEN: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' as `0x${string}`, // YiDengToken合约地址
-  COURSE_MARKET: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' as `0x${string}`, // CourseMarket合约地址
-  CERTIFICATE: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC' as `0x${string}` // CourseCertificate合约地址
-}
+// yideng代币合约地址
+export const YIDENG_TOKEN_ADDRESS = "0xE69393cA7356CBD54f9c8cFDc75d59F288C9bd0A" as const;
+
+// 课程市场合约地址
+export const COURSE_MARKET_ADDRESS = "0x4A76A0c8324b64465017e1228b945AeD263bE3Bf" as const;
+
+// 证书合约地址
+export const COURSE_CERTIFICATE_ADDRESS = "0x9F226B3f0F9303e0eA3023aad6A49A2aB867f6a6" as const;
 
 // ABI导出
 export const ABIS = {
