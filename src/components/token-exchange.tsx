@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react";
+import { useState, useEffect, forwardRef, useMemo, HTMLAttributes } from "react";
 import { ArrowDown, Info, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,17 @@ import { ETH_TO_YIDENG_RATIO } from "@/lib/contract-config";
 import { useAccount, useBalance } from "wagmi";
 import { useYiDengToken } from "@/lib/contract-hooks";
 
-interface TokenExchangeProps extends React.HTMLAttributes<HTMLDivElement> {
+
+interface TokenExchangeProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-export const TokenExchange = React.forwardRef<HTMLDivElement, TokenExchangeProps>(
+export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
   ({ className, ...props }, ref) => {
-    const [amount, setAmount] = React.useState("1.0");
+    const [amount, setAmount] = useState("1.0");
     const { address, isConnected } = useAccount();
     const { exchangeTokens, getBalance, status, error, isLoading } = useYiDengToken();
-    const [yidengBalance, setYidengBalance] = React.useState<bigint>(BigInt(0));
+    const [yidengBalance, setYidengBalance] = useState<bigint>(BigInt(0));
 
     // 获取ETH余额
     const { data: ethBalanceData } = useBalance({
@@ -27,7 +28,7 @@ export const TokenExchange = React.forwardRef<HTMLDivElement, TokenExchangeProps
     });
 
     // 定期获取YIDENG代币余额
-    React.useEffect(() => {
+    useEffect(() => {
       let isMounted = true;
       
       const fetchBalance = async () => {
@@ -53,20 +54,6 @@ export const TokenExchange = React.forwardRef<HTMLDivElement, TokenExchangeProps
       };
     }, [isConnected, address, getBalance, status]);
 
-    // 格式化YIDENG余额，从Wei转换为更易读的格式
-    const formattedYidengBalance = React.useMemo(() => {
-      try {
-        // 转换BigInt为字符串后再转为数字
-        const balanceAsString = yidengBalance.toString();
-        // 假设代币有18位小数
-        const balanceAsNumber = Number(balanceAsString) / Math.pow(10, 18);
-        return balanceAsNumber.toFixed(2);
-      } catch (error) {
-        console.error("余额格式化错误:", error);
-        return "0.00";
-      }
-    }, [yidengBalance]);
-
     // 计算可以兑换的Yideng代币数量
     const yidengAmount = parseFloat(amount || "0") * ETH_TO_YIDENG_RATIO;
 
@@ -75,11 +62,13 @@ export const TokenExchange = React.forwardRef<HTMLDivElement, TokenExchangeProps
       e.preventDefault();
       
       try {
-        // 将ETH金额转换为Wei (1 ETH = 10^18 Wei)
-        // 先将浮点数转换为整数部分和小数部分
+        // 先将浮点数转换为wei单位的BigInt
         const amountFloat = parseFloat(amount || "0");
-        // 转换为Wei (乘以10^18)
-        const amountInWei = BigInt(Math.floor(amountFloat * 1e18));
+        console.log("amountFloat", amountFloat);
+        
+        // 1 ETH = 10^18 Wei
+        const amountInWei = BigInt(Math.floor(amountFloat * 10**18));
+        console.log("amountInWei", amountInWei);
         
         // 调用合约进行兑换
         exchangeTokens(amountInWei);
@@ -178,7 +167,7 @@ export const TokenExchange = React.forwardRef<HTMLDivElement, TokenExchangeProps
                 <span className="text-sm text-muted-foreground">到</span>
                 <span className="text-xs text-muted-foreground">
                   余额: {isConnected ? 
-                    `${formattedYidengBalance} YIDENG` : 
+                    `${yidengBalance} YIDENG` : 
                     "未连接钱包"}
                 </span>
               </div>

@@ -60,9 +60,9 @@ export function useYiDengToken() {
       
       // 调用balanceOf函数
       const balance = await tokenContract.balanceOf(address)
+      console.log('balance', balance)
       return BigInt(balance.toString())
     } catch (error) {
-      console.error('获取易灯代币余额失败:', error)
       return BigInt(0)
     }
   }, [isConnected])
@@ -85,9 +85,9 @@ export function useYiDengToken() {
       // 连接YiDengToken合约
       const tokenContract = YiDengToken__factory.connect(YIDENG_TOKEN_ADDRESS, signer)
       
-      // 准备交易参数
+      // 准备交易参数 - 确保value是BigInt类型
       const options = {
-        value: amountInWei
+        value: amountInWei // 确保amountInWei是BigInt类型
       }
       
       // 调用合约的buyWithETH函数

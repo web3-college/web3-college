@@ -1,4 +1,3 @@
-"use client"
 
 import { Web3Hero } from "@/components/web3-hero"
 import { TokenExchange } from "@/components/token-exchange"
@@ -11,7 +10,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-background/90">
       {/* Hero Section */}
       <Web3Hero 
-        badge="一灯大学"
+        badge="web3大学"
         title1="区块链和Web3"
         title2="开发的最佳平台"
         description="学习区块链和Web3开发的最佳在线平台，使用Yideng代币解锁优质课程内容"
@@ -24,7 +23,7 @@ export default function HomePage() {
             在我们的平台上开始您的 Web3 之旅
           </h2>
           <p className="text-foreground/40 max-w-2xl mx-auto">
-            通过我们的易灯代币系统，解锁优质课程、获取认证并参与Web3社区
+            通过我们的yideng代币系统，解锁优质课程、获取认证并参与Web3社区
           </p>
         </div>
         
@@ -52,7 +51,7 @@ export default function HomePage() {
               </svg>
             </div>
             <h3 className="text-xl font-semibold mb-2">代币经济</h3>
-            <p className="text-foreground/40 mb-4">使用易灯代币购买课程、获取认证和享受平台特权</p>
+            <p className="text-foreground/40 mb-4">使用yideng代币购买课程、获取认证和享受平台特权</p>
             <Button variant="link" className="px-0 text-cyan-400 hover:text-cyan-300">
               了解代币 <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
@@ -93,7 +92,7 @@ export default function HomePage() {
       <footer className="px-4 py-8 md:py-12 border-t border-white/[0.05]">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-lg mb-4">易灯学院</h3>
+            <h3 className="font-bold text-lg mb-4">web3大学</h3>
             <p className="text-foreground/40 text-sm">
               区块链和Web3开发的前沿教育平台
             </p>
@@ -128,7 +127,7 @@ export default function HomePage() {
         </div>
         
         <div className="mt-12 text-center text-sm text-foreground/40">
-          &copy; {new Date().getFullYear()} 易灯学院. 保留所有权利.
+          &copy; {new Date().getFullYear()} web3大学. 保留所有权利.
         </div>
       </footer>
     </div>
