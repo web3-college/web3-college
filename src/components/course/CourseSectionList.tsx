@@ -11,6 +11,7 @@ interface CourseSectionListProps {
   onRemoveSection: (index: number) => void;
   onUpdateSection: (index: number, field: keyof CourseSectionData, value: string) => void;
   onVideoFileChange: (index: number, file: File | null) => void;
+  onAbortUpload: (index: number) => void;
 }
 
 export function CourseSectionList({
@@ -19,7 +20,8 @@ export function CourseSectionList({
   onAddSection,
   onRemoveSection,
   onUpdateSection,
-  onVideoFileChange
+  onVideoFileChange,
+  onAbortUpload
 }: CourseSectionListProps) {
   return (
     <div>
@@ -46,6 +48,7 @@ export function CourseSectionList({
             onUpdate={onUpdateSection}
             onRemove={onRemoveSection}
             onVideoFileChange={onVideoFileChange}
+            onAbortUpload={onAbortUpload}
           />
         ))}
       </div>

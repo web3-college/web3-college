@@ -11,8 +11,80 @@ import {
   UploadState 
 } from "@/lib/upload-storage";
 
+
 // 上传进度回调类型
 export type ProgressCallback = (progress: number) => void;
+
+// 全局上传控制映射，用于控制特定文件的上传
+interface UploadControl {
+  shouldContinue: boolean;
+}
+
+// 使用文件ID作为键的上传控制映射
+const uploadControls: Record<string, UploadControl> = {};
+
+/**
+ * 获取上传控制对象
+ * @param fileId 文件ID
+ * @returns 上传控制对象
+ */
+function getUploadControl(fileId: string): UploadControl {
+  if (!uploadControls[fileId]) {
+    uploadControls[fileId] = { shouldContinue: true };
+  }
+  return uploadControls[fileId];
+}
+
+/**
+ * 暂停指定文件的上传
+ * @param file 文件对象
+ */
+export function pauseUpload(file: File): void {
+  const fileId = generateFileId(file);
+  const control = getUploadControl(fileId);
+  control.shouldContinue = false;
+  console.log(`暂停文件上传: ${file.name} (ID: ${fileId})`);
+}
+
+/**
+ * 暂停指定ID的上传
+ * @param fileId 文件ID
+ */
+export function pauseUploadById(fileId: string): void {
+  const control = getUploadControl(fileId);
+  control.shouldContinue = false;
+  console.log(`暂停文件上传, ID: ${fileId}`);
+}
+
+/**
+ * 恢复指定文件的上传
+ * @param file 文件对象
+ */
+export function resumeUpload(file: File): void {
+  const fileId = generateFileId(file);
+  const control = getUploadControl(fileId);
+  control.shouldContinue = true;
+  console.log(`恢复文件上传: ${file.name} (ID: ${fileId})`);
+}
+
+/**
+ * 恢复指定ID的上传
+ * @param fileId 文件ID
+ */
+export function resumeUploadById(fileId: string): void {
+  const control = getUploadControl(fileId);
+  control.shouldContinue = true;
+  console.log(`恢复文件上传, ID: ${fileId}`);
+}
+
+/**
+ * 清理指定文件的上传控制状态
+ * @param file 文件对象 
+ */
+export function cleanupUploadControl(file: File): void {
+  const fileId = generateFileId(file);
+  delete uploadControls[fileId];
+}
 
 // 处理小文件上传
 export const uploadSmallFile = async (file: File, onProgress?: ProgressCallback): Promise<string> => {
@@ -61,11 +133,15 @@ export const uploadFileChunks = async (
   key: string, 
   uploadId: string,
   file: File,
+  fileId: string,
   onProgress?: ProgressCallback,
   existingUploadState?: UploadState
 ): Promise<{ETag: string, PartNumber: number}[]> => {
   // 如果有现有的上传状态，使用它初始化partList
   let partList: {ETag: string, PartNumber: number}[] = [];
+  
+  // 获取文件的上传控制对象
+  const control = getUploadControl(fileId);
   
   if (existingUploadState?.uploadedChunks) {
     partList = [...existingUploadState.uploadedChunks];
@@ -94,6 +170,12 @@ export const uploadFileChunks = async (
   
   // 上传单个分片的函数
   const uploadChunk = async (chunkState: {index: number, partNumber: number, uploaded: boolean, retries: number}) => {
+    // 在每个分片上传前检查是否应该继续
+    if (!control.shouldContinue) {
+      console.log(`分片 ${chunkState.partNumber} 上传被暂停`);
+      return;
+    }
+    
     if (chunkState.uploaded || chunkState.retries >= retryLimit) {
       return;
     }
@@ -106,6 +188,12 @@ export const uploadFileChunks = async (
       formData.append('partNumber', chunkState.partNumber.toString());
       
       const result = await uploadVideoChunk(formData);
+      
+      // 再次检查是否应该继续
+      if (!control.shouldContinue) {
+        console.log(`分片 ${chunkState.partNumber} 上传完成，但上传已被取消`);
+        return;
+      }
       
       if (result && result.data) {
         // 更新或添加到已上传列表
@@ -126,7 +214,6 @@ export const uploadFileChunks = async (
         }
         
         // 保存上传状态到localStorage
-        const fileId = generateFileId(file);
         const uploadState: UploadState = {
           fileId,
           fileName: file.name,
@@ -146,6 +233,7 @@ export const uploadFileChunks = async (
         throw new Error(`分片 ${chunkState.partNumber} 上传失败`);
       }
     } catch (error) {
+      
       console.error(`分片 ${chunkState.partNumber} 上传失败，正在重试 (${chunkState.retries + 1}/${retryLimit})`, error);
       chunkState.retries++;
       
@@ -167,6 +255,10 @@ export const uploadFileChunks = async (
   }
   
   await chunkPool.wait();
+
+  if (!control.shouldContinue) {
+    throw new Error("上传已被用户取消");
+  }
   
   // 检查是否所有分片都上传成功
   const failedChunks = chunkStates.filter(chunk => !chunk.uploaded);
@@ -187,15 +279,26 @@ export const mergeUploadedChunks = async (
   key: string, 
   uploadId: string, 
   partList: {ETag: string, PartNumber: number}[], 
-  file: File
+  file: File,
+  fileId: string
 ): Promise<string> => {
+  // 获取文件的上传控制对象
+  const control = getUploadControl(fileId);
+  
+  // 在合并前再次检查是否应该继续
+  if (!control.shouldContinue) {
+    throw new Error("上传已被用户取消");
+  }
+  
   try {
     const mergeResult = await completeVideoUpload(key, uploadId, partList);
     
     if (mergeResult && mergeResult.data.url) {
       // 合并成功后删除上传状态
-      const fileId = generateFileId(file);
       removeUploadState(fileId);
+      
+      // 清理上传控制对象
+      delete uploadControls[fileId];
       
       return mergeResult.data.url;
     }
@@ -222,9 +325,14 @@ export const checkIncompleteUpload = (file: File): UploadState | undefined => {
 // 处理大文件分片上传
 export const uploadLargeFile = async (
   file: File, 
-  onProgress?: ProgressCallback, 
+  fileId: string,
+  onProgress?: ProgressCallback,
   onUploadStarted?: (key: string, uploadId: string) => void
 ): Promise<string> => {
+  // 获取文件的上传控制对象
+  const control = getUploadControl(fileId);
+  control.shouldContinue = true; // 初始化时设置为继续状态
+  
   // 检查是否有未完成的上传
   const existingUpload = checkIncompleteUpload(file);
   
@@ -249,6 +357,11 @@ export const uploadLargeFile = async (
       console.warn(`分片数量不匹配：预期 ${existingUpload.totalChunks}，实际 ${chunks.length}`);
     }
   } else {
+    // 在初始化前检查是否应该继续
+    if (!control.shouldContinue) {
+      throw new Error("上传已被用户取消");
+    }
+    
     // 正常初始化上传
     const initResult = await initChunkUpload(file);
     key = initResult.key;
@@ -259,6 +372,8 @@ export const uploadLargeFile = async (
       if (onProgress) {
         onProgress(100);
       }
+      // 清理上传控制对象
+      delete uploadControls[fileId];
       return initResult.directUrl;
     }
     
@@ -271,7 +386,6 @@ export const uploadLargeFile = async (
     chunks = await sliceFile(file);
     
     // 初始化上传状态
-    const fileId = generateFileId(file);
     const uploadState: UploadState = {
       fileId,
       fileName: file.name,
@@ -291,12 +405,11 @@ export const uploadLargeFile = async (
   
   try {
     // 上传所有分片，失败会自动重试
-    const partList = await uploadFileChunks(chunks, key, uploadId, file, onProgress, existingUpload);
+    const partList = await uploadFileChunks(chunks, key, uploadId, file, fileId, onProgress, existingUpload);
     
     // 只有当所有分片上传成功后，才尝试合并
-    return await mergeUploadedChunks(key, uploadId, partList, file);
+    return await mergeUploadedChunks(key, uploadId, partList, file, fileId);
   } catch (error) {
-    console.error('分片上传失败:', error);
     throw error;
   }
 };
@@ -311,9 +424,13 @@ export const uploadVideoFile = async (
     onProgress(0);
   }
   
+  // 获取文件ID，用于外部控制
+  const fileId = generateFileId(file);
+  console.log(`开始上传文件: ${file.name}, fileId: ${fileId}`);
+  
   try {
     if (file.size > 50 * 1024 * 1024) {
-      return await uploadLargeFile(file, onProgress, onUploadStarted);
+      return await uploadLargeFile(file, fileId, onProgress, onUploadStarted);
     } else {
       return await uploadSmallFile(file, onProgress);
     }
