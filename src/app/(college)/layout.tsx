@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import { RainbowProvider } from "@/providers/rainbow-provider";
 import '@rainbow-me/rainbowkit/styles.css';
+import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
   title: "Web3 College",
@@ -13,10 +14,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-            {children}
-      </body>
-    </html>
+    <RainbowProvider>
+      <Navbar />
+      <main>
+        {children}
+      </main>
+    </RainbowProvider>
   );
 }

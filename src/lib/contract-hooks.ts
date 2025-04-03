@@ -124,118 +124,226 @@ export function useYiDengToken() {
 /**
  * 使用CourseMarket合约
  */
-// // export function useCourseMarket() {
-//   const { isConnected } = useAccount()
+export function useCourseMarket() {
+  const { isConnected } = useAccount()
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   
-//   // 获取所有课程
-//   const getAllCourses = useCallback(async () => {
-//     try {
-//       const provider = await getEthersProvider()
-//       if (!provider) throw new Error('无法连接到以太坊网络')
+  // 获取所有课程
+  const getAllCourses = useCallback(async () => {
+    try {
+      const provider = await getEthersProvider()
+      if (!provider) throw new Error('无法连接到以太坊网络')
       
-//       // 连接CourseMarket合约
-//       const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, provider)
+      // 连接CourseMarket合约
+      const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, provider)
       
-//       // 调用合约获取课程总数
-//       const courseCount = await marketContract.courseCount()
-//       const courses = []
+      // 调用合约获取课程总数
+      const courseCount = await marketContract.courseCount()
+      const courses = []
       
-//       // 循环获取所有课程
-//       for (let i = 0; i < courseCount; i++) {
-//         const course = await marketContract.courses(i)
-//         courses.push(course)
-//       }
+      // 循环获取所有课程
+      for (let i = 1; i <= courseCount; i++) {
+        const course = await marketContract.courses(i)
+        courses.push(course)
+      }
       
-//       return courses
-//     } catch (error) {
-//       console.error('获取课程列表失败:', error)
-//       return []
-//     }
-//   }, [isConnected])
+      return courses
+    } catch (error) {
+      console.error('获取课程列表失败:', error)
+      return []
+    }
+  }, [isConnected])
   
-//   // 获取用户购买的课程
-//   const getUserCourses = useCallback(async () => {
-//     if (!isConnected) return []
+  // 获取用户购买的课程
+  const getUserCourses = useCallback(async () => {
+    if (!isConnected) return []
     
-//     try {
-//       const provider = await getEthersProvider()
-//       if (!provider) throw new Error('无法连接到以太坊网络')
+    try {
+      const provider = await getEthersProvider()
+      if (!provider) throw new Error('无法连接到以太坊网络')
       
-//       const signer = await provider.getSigner()
-//       const address = await signer.getAddress()
+      const signer = await provider.getSigner()
+      const address = await signer.getAddress()
       
-//       // 连接CourseMarket合约
-//       const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, provider)
+      // 连接CourseMarket合约
+      const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, provider)
       
-//       try {
-//         // 获取用户购买的所有课程ID
-//         // 方法1: 尝试调用专门获取用户课程的方法
-//         const courseIds = await marketContract.getUserPurchasedCourses(address)
-//         const courses = []
-        
-//         // 获取每个课程的详细信息
-//         for (const id of courseIds) {
-//           const course = await marketContract.courses(id)
-//           courses.push(course)
-//         }
-        
-//         return courses
-//       } catch (err) {
-//         console.error("getUserPurchasedCourses方法不存在，尝试替代方法", err)
-        
-//         // 方法2: 如果上面的方法不存在，尝试从课程总数中筛选用户购买的课程
-//         const courseCount = await marketContract.courseCount()
-//         const courses = []
-        
-//         // 检查用户是否购买了每个课程
-//         for (let i = 0; i < courseCount; i++) {
-//           const hasPurchased = await marketContract.hasPurchased(address, i)
-//           if (hasPurchased) {
-//             const course = await marketContract.courses(i)
-//             courses.push(course)
-//           }
-//         }
-        
-//         return courses
-//       }
-//     } catch (error) {
-//       console.error('获取用户课程失败:', error)
-//       return []
-//     }
-//   }, [isConnected])
+      // 获取课程总数
+      const courseCount = await marketContract.courseCount()
+      const courses = []
+      
+      // 循环检查用户是否购买了每个课程
+      for (let i = 1; i <= courseCount; i++) {
+        const hasPurchased = await marketContract.userCourses(address, i)
+        if (hasPurchased) {
+          const course = await marketContract.courses(i)
+          courses.push(course)
+        }
+      }
+      
+      return courses
+    } catch (error) {
+      console.error('获取用户课程失败:', error)
+      return []
+    }
+  }, [isConnected])
   
-//   // 购买课程
-//   const purchaseCourse = useCallback(async (courseId: string) => {
-//     if (!isConnected) throw new Error('请先连接钱包')
+  // 购买课程
+  const purchaseCourse = useCallback(async (web2CourseId: string) => {
+    if (!isConnected) throw new Error('请先连接钱包')
     
-//     try {
-//       const signer = await getEthersSigner()
-//       if (!signer) throw new Error('无法获取签名者')
+    try {
+      setStatus('loading')
+      setIsLoading(true)
+      setError(null)
       
-//       // 连接CourseMarket合约
-//       const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, signer)
+      const signer = await getEthersSigner()
+      if (!signer) throw new Error('无法获取签名者')
       
-//       // 调用合约购买课程
-//       const tx = await marketContract.purchaseCourse(courseId)
+      // 连接CourseMarket合约
+      const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, signer)
       
-//       // 等待交易确认
-//       console.log('购买课程交易已提交:', tx.hash)
-//       const receipt = await tx.wait()
-//       console.log('购买课程交易已确认:', receipt)
+      // 调用合约购买课程
+      const tx = await marketContract.purchaseCourse(web2CourseId)
       
-//       return tx.hash
-//     } catch (error) {
-//       console.error('购买课程失败:', error)
-//       throw error
-//     }
-//   }, [isConnected])
+      // 等待交易确认
+      console.log('购买课程交易已提交:', tx.hash)
+      const receipt = await tx.wait()
+      console.log('购买课程交易已确认:', receipt)
+      
+      setStatus('success')
+      return tx.hash
+    } catch (error: any) {
+      console.error('购买课程失败:', error)
+      setStatus('error')
+      setError(error?.message || '购买课程失败')
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }, [isConnected])
   
-//   return {
-//     getAllCourses,
-//     getUserCourses,
-//     purchaseCourse
-//   }
-// }
+  // 检查用户是否已购买课程
+  const hasCourse = useCallback(async (web2CourseId: string) => {
+    if (!isConnected) return false
+    
+    try {
+      const provider = await getEthersProvider()
+      if (!provider) throw new Error('无法连接到以太坊网络')
+      
+      const signer = await provider.getSigner()
+      const address = await signer.getAddress()
+      
+      // 连接CourseMarket合约
+      const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, provider)
+      
+      // 调用hasCourse方法
+      const hasPurchased = await marketContract.hasCourse(address, web2CourseId)
+      return hasPurchased
+    } catch (error) {
+      console.error('检查课程购买状态失败:', error)
+      return false
+    }
+  }, [isConnected])
+  
+  // 添加新课程
+  // web2CourseId: 数据库中的课程ID
+  // name: 课程名称
+  // price: 课程价格(以YIDENG币为单位，假设支持两位小数精度，例如12.34表示为1234)
+  const addCourse = useCallback(async (web2CourseId: string, name: string, price: bigint) => {
+    if (!isConnected) throw new Error('请先连接钱包')
+    
+    try {
+      setStatus('loading')
+      setIsLoading(true)
+      setError(null)
+      
+      const signer = await getEthersSigner()
+      if (!signer) throw new Error('无法获取签名者')
+      
+      // 获取钱包地址
+      const walletAddress = await signer.getAddress()
+      console.log('钱包地址:', walletAddress)
+      
+      // 连接CourseMarket合约
+      const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, signer)
+      
+      // 检查合约状态
+      try {
+        const owner = await marketContract.owner()
+        const isOwner = owner.toLowerCase() === walletAddress.toLowerCase()
+        console.log('合约所有者:', owner)
+        console.log('当前用户是否为所有者:', isOwner)
+        
+        // 检查web2CourseId是否已存在
+        try {
+          const existingId = await marketContract.web2ToCourseId(web2CourseId)
+          if (existingId > BigInt(0)) {
+            console.warn('该courseId已存在:', existingId.toString())
+          }
+        } catch (e) {
+          // 如果ID不存在，这里可能会抛出错误，属于正常情况
+          console.log('该courseId尚未使用')
+        }
+      } catch (checkError) {
+        console.error('检查合约状态失败:', checkError)
+      }
+      
+      console.log('调用合约addCourse参数:', {
+        web2CourseId,
+        name,
+        price: price.toString(), // YIDENG代币价格
+      })
+      
+      // 调用合约添加课程
+      const tx = await marketContract.addCourse(web2CourseId, name, price)
+      
+      // 等待交易确认
+      console.log('添加课程交易已提交:', tx.hash)
+      const receipt = await tx.wait()
+      console.log('添加课程交易已确认:', receipt)
+      
+      setStatus('success')
+      return tx.hash
+    } catch (error: any) {
+      console.error('添加课程失败:', error)
+      
+      // 提取更详细的错误信息
+      let errorMsg = '添加课程失败'
+      
+      if (error.code) {
+        console.error('错误代码:', error.code)
+      }
+      
+      if (error.data) {
+        console.error('错误数据:', error.data)
+      }
+      
+      if (error.transaction) {
+        console.error('错误交易:', error.transaction)
+      }
+      
+      setStatus('error')
+      setError(error?.message || errorMsg)
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }, [isConnected])
+  
+  return {
+    getAllCourses,
+    getUserCourses,
+    purchaseCourse,
+    hasCourse,
+    addCourse,
+    status,
+    isLoading,
+    error
+  }
+}
 
 /**
  * 使用CourseCertificate合约
