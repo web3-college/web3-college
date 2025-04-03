@@ -14,7 +14,8 @@ import {
   CourseSectionData,
   StatusMessage
 } from "@/components/course";
-import { uploadVideoFile } from "@/lib/video-upload";
+import { generateFileId } from "@/lib/upload-storage";
+import { uploadVideoFile, pauseUpload, cleanupUploadControl } from "@/lib/video-upload";
 import { getAllUploadStates, cleanupExpiredStates } from "@/lib/upload-storage";
 import { createCourse, deleteCourse } from "@/api/course";
 // 导入合约配置和工厂
@@ -133,11 +134,6 @@ export default function NewCoursePage() {
       
       return true;
     } catch (error) {
-      console.error('视频上传失败:', error);
-      setUploadStatus(prev => ({
-        ...prev,
-        [`video-${index}`]: { progress: 0, error: '视频上传失败，请重试' }
-      }));
       throw error;
     }
   };
@@ -151,11 +147,13 @@ export default function NewCoursePage() {
         // 直接处理当前视频
         await processVideoUpload(index, file);
       } catch (error) {
-        console.error('视频上传失败:', error);
-        setUploadStatus(prev => ({
-          ...prev,
-          [`video-${index}`]: { progress: 0, error: '视频上传失败，请重试' }
-        }));
+        if (error instanceof Error && error.message !== "上传已被用户取消") {
+          console.error('视频上传失败:', error);
+          setUploadStatus(prev => ({
+            ...prev,
+            [`video-${index}`]: { progress: 0, error: '视频上传失败，请重试' }
+          }));
+        }
       } finally {
         // 移除已处理的任务
         setUploadQueue(prev => prev.slice(1));
@@ -207,6 +205,30 @@ export default function NewCoursePage() {
       setUploadQueue(prev => prev.filter(item => item.index !== index));
     }
     setSections(newSections);
+  };
+
+  // 取消视频上传
+  const handleAbortUpload = async (index: number) => {
+    console.log('取消视频上传');
+    
+    const section = sections[index];
+    if (section?.videoFile) {
+      // 使用全局变量控制机制暂停上传
+      pauseUpload(section.videoFile);
+      console.log(`通过控制变量取消视频上传: 索引=${index}, fileId=${generateFileId(section.videoFile)}`);
+      
+      // 更新上传状态
+      setUploadStatus(prev => ({
+        ...prev,
+        [`video-${index}`]: { progress: 0, error: '上传已取消' }
+      }));
+      
+      // 从上传队列中删除
+      setUploadQueue(prev => prev.filter(item => item.index !== index));
+      
+      // 清理上传控制状态
+      cleanupUploadControl(section.videoFile);
+    }
   };
 
   // 添加课程章节
@@ -501,6 +523,7 @@ export default function NewCoursePage() {
             onRemoveSection={removeSection}
             onUpdateSection={updateSection}
             onVideoFileChange={handleVideoFileChange}
+            onAbortUpload={handleAbortUpload}
           />
         </Card>
         

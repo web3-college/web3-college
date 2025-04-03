@@ -10,6 +10,7 @@ interface VideoUploaderProps {
   index: number;
   onVideoUrlChange: (value: string) => void;
   onVideoFileChange: (file: File | null) => void;
+  onAbortUpload: () => void;
   uploadStatus?: {
     progress: number;
     error: string | null;
@@ -21,7 +22,8 @@ export function VideoUploader({
   index,
   onVideoUrlChange,
   onVideoFileChange,
-  uploadStatus
+  uploadStatus,
+  onAbortUpload
 }: VideoUploaderProps) {
   const [videoFile, setVideoFile] = useState<File | null>(null);
 
@@ -65,6 +67,7 @@ export function VideoUploader({
 
   // 移除视频文件
   const removeVideoFile = () => {
+    onAbortUpload();
     setVideoFile(null);
     onVideoFileChange(null);
   };
