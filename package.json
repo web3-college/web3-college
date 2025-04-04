@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typechain": "typechain --target ethers-v6 --out-dir src/types/contracts src/abi/*.json"
+    "typechain": "typechain --target ethers-v6 --out-dir src/types/contracts src/abi/*.json",
+    "gen:api": "node ./scripts/gen-api.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
@@ -38,6 +39,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "openapi-typescript-codegen": "^0.29.0",
     "tailwindcss": "^4",
     "typechain": "^8.3.2",
     "typescript": "^5"

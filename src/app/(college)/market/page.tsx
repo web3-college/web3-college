@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Zap, BookOpen, ArrowRight } from "lucide-react";
+import { CourseService } from "@/api";
 
 interface Course {
   id: string;
@@ -20,6 +21,14 @@ export default function MarketPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("全部");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const getCourses = async () => {
+    const newCourses = await CourseService.courseControllerFindAllCourses({
+      isActive: true,
+      categoryId: 1
+    })
+    console.log(newCourses);
+  }
+  getCourses()
 
   useEffect(() => {
     // 模拟从API加载课程

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUploader } from "./ImageUploader";
-import { getCategories } from "@/api/category";
+import { CategoryService } from "@/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // 使用API响应中定义的分类数据类型
@@ -47,31 +47,33 @@ export function CourseBasicInfo({
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const fetchCategories = async () => {
+    setIsLoading(true);
+    try {
+      const result = await CategoryService.categoryControllerFindAllCategories({
+        isActive: true
+      });
+      console.log("分类数据:", result); // 调试输出
+      
+      if (result && result.code === 200 && Array.isArray(result.data)) {
+        setCategories(result.data);
+      } else if (result && Array.isArray(result.data)) {
+        // 兼容没有code字段的情况
+        setCategories(result.data);
+      } else {
+        console.error("获取分类数据格式错误:", result);
+        setFormError("获取分类数据失败：格式错误");
+      }
+    } catch (error) {
+      console.error("获取分类数据错误:", error);
+      setFormError("获取分类数据错误");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 获取分类数据
   useEffect(() => {
-    const fetchCategories = async () => {
-      setIsLoading(true);
-      try {
-        const result = await getCategories();
-        console.log("分类数据:", result); // 调试输出
-        
-        if (result && result.code === 200 && Array.isArray(result.data)) {
-          setCategories(result.data);
-        } else if (result && Array.isArray(result.data)) {
-          // 兼容没有code字段的情况
-          setCategories(result.data);
-        } else {
-          console.error("获取分类数据格式错误:", result);
-          setFormError("获取分类数据失败：格式错误");
-        }
-      } catch (error) {
-        console.error("获取分类数据错误:", error);
-        setFormError("获取分类数据错误");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchCategories();
   }, [setFormError]);
 

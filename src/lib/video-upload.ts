@@ -1,5 +1,4 @@
-import { uploadVideoChunk, initVideoMultipartUpload, completeVideoUpload, getUploadStatus } from "@/api/upload";
-import { uploadVideo as apiUploadVideo } from "@/api/upload";
+import { UploadService } from "@/api";
 import { sliceFile } from "@/lib/file";
 import { PromisePool } from "@/lib/promise-pool";
 import { 
@@ -88,14 +87,17 @@ export function cleanupUploadControl(file: File): void {
 
 // 处理小文件上传
 export const uploadSmallFile = async (file: File, onProgress?: ProgressCallback): Promise<string> => {
-  const formData = new FormData();
-  formData.append('file', file);
+  const formData = {
+    file
+  };
   
   if (onProgress) {
     onProgress(0);
   }
   
-  const result = await apiUploadVideo(formData);
+  const result = await UploadService.uploadControllerUploadSmallVideo({
+    formData
+  });
   
   if (result && result.data && result.data.url) {
     if (onProgress) {
@@ -108,7 +110,11 @@ export const uploadSmallFile = async (file: File, onProgress?: ProgressCallback)
 
 // 初始化分片上传
 export const initChunkUpload = async (file: File): Promise<{key: string, uploadId: string, directUrl?: string}> => {
-  const initResult = await initVideoMultipartUpload(file);
+  const initResult = await UploadService.uploadControllerInitiateVideoUpload({
+    formData:{
+      file
+    }
+  });
   
   if (initResult && initResult.data.uploadId) {
     return {
@@ -181,13 +187,16 @@ export const uploadFileChunks = async (
     }
     
     try {
-      const formData = new FormData();
-      formData.append('file', chunks[chunkState.index]);
-      formData.append('key', key);
-      formData.append('uploadId', uploadId);
-      formData.append('partNumber', chunkState.partNumber.toString());
+      const formData = {
+        file: chunks[chunkState.index],
+        key,
+        uploadId,
+        partNumber: chunkState.partNumber
+      };
       
-      const result = await uploadVideoChunk(formData);
+      const result = await UploadService.uploadControllerUploadVideoPart({
+        formData
+      });
       
       // 再次检查是否应该继续
       if (!control.shouldContinue) {
@@ -291,7 +300,13 @@ export const mergeUploadedChunks = async (
   }
   
   try {
-    const mergeResult = await completeVideoUpload(key, uploadId, partList);
+    const mergeResult = await UploadService.uploadControllerCompleteVideoUpload({
+      requestBody:{
+        key,
+        uploadId,
+        parts: partList
+      }
+    });
     
     if (mergeResult && mergeResult.data.url) {
       // 合并成功后删除上传状态

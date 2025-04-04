@@ -13,7 +13,7 @@ import { ETH_TO_YIDENG_RATIO, YIDENG_TOKEN_ADDRESS, COURSE_MARKET_ADDRESS, COURS
 /**
  * 使用ethers v6获取提供者和签名者
  */
-async function getEthersProvider() {
+export async function getEthersProvider() {
   // 如果window.ethereum存在，使用它创建一个provider
   if (window.ethereum) {
     const provider = new ethers.BrowserProvider(window.ethereum)
@@ -23,7 +23,7 @@ async function getEthersProvider() {
   return null
 }
 
-async function getEthersSigner() {
+export async function getEthersSigner() {
   const provider = await getEthersProvider()
   if (!provider) return null
   
