@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Image, X } from "lucide-react";
-import { uploadImage } from "@/api/upload";
+import { UploadService } from "@/api";
 
 interface ImageUploaderProps {
   imageUrl: string;
@@ -70,14 +70,17 @@ export function ImageUploader({
 
   // 上传图片到服务器
   const uploadImageToServer = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
+    const formData = {
+      file
+    }
     
     // 显示上传进度
     setUploadProgress(20);
     
     try {
-      const data = await uploadImage(formData);
+      const data = await UploadService.uploadControllerUploadImage({
+        formData: formData
+      });
       
       setUploadProgress(80);
       setUploadProgress(100);

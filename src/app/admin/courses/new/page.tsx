@@ -17,25 +17,15 @@ import {
 import { generateFileId } from "@/lib/upload-storage";
 import { uploadVideoFile, pauseUpload, cleanupUploadControl } from "@/lib/video-upload";
 import { getAllUploadStates, cleanupExpiredStates } from "@/lib/upload-storage";
-import { createCourse, deleteCourse } from "@/api/course";
+import { CourseService } from "@/api";
 // 导入合约配置和工厂
 import { COURSE_MARKET_ADDRESS } from "@/lib/contract-config";
 import { CourseMarket__factory } from "@/types/contracts/factories";
-// 导入ethers
-import { ethers } from "ethers";
 // 导入确认对话框组件
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { getEthersProvider } from "@/lib/contract-hooks"
 
-// 获取以太坊提供者函数
-async function getEthersProvider() {
-  // 如果window.ethereum存在，使用它创建一个provider
-  if (window.ethereum) {
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    return provider;
-  }
-  // 否则返回null
-  return null;
-}
+
 
 export default function NewCoursePage() {
   const router = useRouter();
@@ -313,16 +303,18 @@ export default function NewCoursePage() {
         setFormStatus('submitting');
         console.log('正在创建课程...');
         
-        const response = await createCourse({
-          name,
-          description,
-          price: Number(confirmPrice), // 使用整数价格
-          categoryId: parseInt(categoryId),
-          coverImage,
-          creator: address || "",
-          sections: sections.map(({ title, description, order, videoUrl }) => ({
-            title, description, order, videoUrl
-          }))
+        const response = await CourseService.courseControllerCreateCourse({
+          requestBody:{
+            name,
+            description,
+            price: Number(confirmPrice), // 使用整数价格
+            categoryId: parseInt(categoryId),
+            coverImage,
+            creator: address || "",
+            sections: sections.map(({ title, description, order, videoUrl }) => ({
+              title, description, order, videoUrl
+            }))
+          }
         });
   
         if (response.code !== 200) {
@@ -402,7 +394,9 @@ export default function NewCoursePage() {
           if (courseId) {
             try {
               console.log('合约调用失败，删除数据库中的课程，ID:', courseId);
-              const deleteResponse = await deleteCourse(String(courseId));
+              const deleteResponse = await CourseService.courseControllerDeleteCourse({
+                id: courseId
+              });
               if (deleteResponse.code === 200) {
                 console.log('成功删除数据库中的课程');
                 errorMessage += "。已自动清理数据库中的课程数据。";
