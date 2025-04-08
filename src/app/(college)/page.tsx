@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import { ETH_TO_YIDENG_RATIO } from "@/lib/contract-config"
 
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/90">
       {/* Hero Section */}
-      <Web3Hero 
+      <Web3Hero
         badge="web3大学"
         title1="区块链和Web3"
         title2="开发的最佳平台"
         description="学习区块链和Web3开发的最佳在线平台，使用Yideng代币解锁优质课程内容"
       />
-      
+
       {/* Features Section */}
       <section className="px-4 py-16 md:py-24">
         <div className="text-center mb-16">
@@ -26,7 +26,7 @@ export default function HomePage() {
             通过我们的yideng代币系统，解锁优质课程、获取认证并参与Web3社区
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-gradient-to-br from-background/50 to-background/20 p-6 rounded-xl border border-white/[0.05] shadow-sm">
             <div className="w-12 h-12 bg-indigo-500/10 flex items-center justify-center rounded-lg mb-4">
@@ -41,7 +41,7 @@ export default function HomePage() {
               探索课程 <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
-          
+
           <div className="bg-gradient-to-br from-background/50 to-background/20 p-6 rounded-xl border border-white/[0.05] shadow-sm">
             <div className="w-12 h-12 bg-cyan-500/10 flex items-center justify-center rounded-lg mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-500">
@@ -56,7 +56,7 @@ export default function HomePage() {
               了解代币 <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
-          
+
           <div className="bg-gradient-to-br from-background/50 to-background/20 p-6 rounded-xl border border-white/[0.05] shadow-sm">
             <div className="w-12 h-12 bg-purple-500/10 flex items-center justify-center rounded-lg mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500">
@@ -71,7 +71,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      
+
       {/* Token Exchange Section */}
       <section className="px-4 py-16 md:py-24">
         <div className="max-w-4xl mx-auto">
@@ -83,11 +83,11 @@ export default function HomePage() {
               使用以太币兑换YIDENG代币，以 1:{ETH_TO_YIDENG_RATIO} 的比例获得更多平台权益
             </p>
           </div>
-          
+
           <TokenExchange className="mx-auto" />
         </div>
       </section>
-      
+
       {/* Footer */}
       <footer className="px-4 py-8 md:py-12 border-t border-white/[0.05]">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -97,7 +97,7 @@ export default function HomePage() {
               区块链和Web3开发的前沿教育平台
             </p>
           </div>
-          
+
           <div>
             <h4 className="font-semibold mb-4">产品</h4>
             <ul className="space-y-2">
@@ -106,7 +106,7 @@ export default function HomePage() {
               <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">代币</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="font-semibold mb-4">资源</h4>
             <ul className="space-y-2">
@@ -115,7 +115,7 @@ export default function HomePage() {
               <li><a href="#" className="text-foreground/40 hover:text-foreground text-sm">社区</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="font-semibold mb-4">联系我们</h4>
             <ul className="space-y-2">
@@ -125,7 +125,7 @@ export default function HomePage() {
             </ul>
           </div>
         </div>
-        
+
         <div className="mt-12 text-center text-sm text-foreground/40">
           &copy; {new Date().getFullYear()} web3大学. 保留所有权利.
         </div>

@@ -7,6 +7,7 @@ import { CourseSkeletons } from "./CourseSkeletons";
 import { CourseList } from "./CourseList";
 import { CourseService } from "@/api";
 import { toast } from "sonner";
+import { AuthService } from "@/api/services/AuthService";
 
 interface Course {
   id: number;

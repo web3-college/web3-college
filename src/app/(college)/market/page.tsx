@@ -1,6 +1,5 @@
 import { CourseService, CategoryService } from "@/api";
 import { MarketClient } from "@/components/market/MarketClient";
-import { Suspense } from "react";
 
 // 从CreateCourseDto派生出Course类型
 interface Course {
