@@ -51,9 +51,20 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
         },
 
         signOut: async () => {
-          await fetch("http://localhost:3001/api/v1/auth/logout", {
-            credentials: "include",
-          });
+          try {
+            const response = await fetch("http://localhost:3001/api/v1/auth/logout", {
+              credentials: "include",
+            });
+            const { data } = await response.json();
+
+            if (data.success) {
+              setStatus("unauthenticated");
+            } else {
+              console.error("登出失败");
+            }
+          } catch (error) {
+            console.error("登出请求失败:", error);
+          }
         },
       }),
     []
