@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { RainbowProvider } from "@/providers/rainbow-provider";
-import '@rainbow-me/rainbowkit/styles.css';
 import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
@@ -14,11 +12,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <RainbowProvider>
+    <>
       <Navbar />
       <main>
         {children}
       </main>
-    </RainbowProvider>
+    </>
   );
 }
