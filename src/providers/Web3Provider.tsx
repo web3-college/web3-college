@@ -15,16 +15,24 @@ const siweConfig: SIWEConfig = {
 
     return response.data?.nonce || '';
   },
-  createMessage: ({ nonce, address, chainId }) => new SiweMessage({
-    version: '1',
-    domain: window.location.host,
-    uri: window.location.origin,
-    address,
-    chainId,
-    nonce,
-    // Human-readable ASCII assertion that the user will sign, and it must not contain `\n`.
-    statement: 'Sign in With Ethereum.',
-  }).prepareMessage(),
+  createMessage: ({ nonce, address, chainId }) => {
+    console.log('createMessage');
+
+    const message = new SiweMessage({
+      version: '1',
+      domain: window.location.host,
+      uri: window.location.origin,
+      address,
+      chainId,
+      nonce,
+      // Human-readable ASCII assertion that the user will sign, and it must not contain `\n`.
+      statement: 'Sign in With Ethereum.',
+    }).prepareMessage();
+
+    console.log(message);
+
+    return message;
+  },
   verifyMessage: async ({ message, signature }) => {
     console.log('verifyMessage');
 
@@ -44,10 +52,10 @@ const siweConfig: SIWEConfig = {
     const response = await AuthService.authControllerGetUserInfo();
     console.log(response.data);
 
-    return {
+    return response.data?.address && response.data?.chainId ? {
       address: response.data?.address as `0x${string}`,
       chainId: response.data?.chainId as number,
-    };
+    } : null;
   },
   signOut: async () => {
     console.log('signOut');
