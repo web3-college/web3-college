@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus, Pencil, Eye, Trash2, Zap, BookOpen, FileText } from "lucide-react";
+import { Pencil, Eye, Trash2 } from "lucide-react";
 
 interface CourseSection {
   id: number;
@@ -129,25 +129,6 @@ export default function CoursesAdminPage() {
 
                       <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
                       <p className="text-foreground/40 text-sm mb-4 line-clamp-2">{course.description}</p>
-
-                      <div className="flex flex-wrap items-center gap-4">
-                        <div className="flex items-center text-sm">
-                          <Zap className="h-4 w-4 text-yellow-500 mr-1.5" />
-                          {course.price} YIDENG
-                        </div>
-
-                        <div className="flex items-center text-sm">
-                          <BookOpen className="h-4 w-4 mr-1.5" />
-                          {course.sections.length} 章节
-                        </div>
-
-                        {course.txHash && (
-                          <div className="flex items-center text-sm text-foreground/40">
-                            <FileText className="h-4 w-4 mr-1.5" />
-                            交易: {course.txHash.substring(0, 8)}...
-                          </div>
-                        )}
-                      </div>
                     </div>
 
                     <div className="flex flex-wrap md:flex-nowrap gap-2 mt-4 md:mt-0 md:ml-4">
@@ -171,12 +152,6 @@ export default function CoursesAdminPage() {
               <p className="text-foreground/40 mb-8">
                 您还没有创建任何课程，马上开始创建吧！
               </p>
-
-              <Link href="/admin/courses/new">
-                <Button className="rounded-full">
-                  <Plus className="h-4 w-4 mr-2" /> 创建第一个课程
-                </Button>
-              </Link>
             </div>
           )}
         </>

@@ -1,8 +1,8 @@
+"use client"
 
 import { ReactNode } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
   Book,
   LayoutDashboard,
@@ -12,6 +12,8 @@ import {
   FileCode,
   Settings,
   LogOut,
+  Shield,
+  UserCog,
 } from "lucide-react";
 import { ConnectKitButton } from "connectkit";
 
@@ -76,6 +78,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 证书管理
               </Button>
             </Link>
+
+            {/* 权限管理导航 */}
+            <div className="pt-4 border-t border-white/[0.05] mt-4">
+              <h3 className="px-3 text-xs font-semibold text-foreground/40 uppercase tracking-wider mb-2">
+                系统管理
+              </h3>
+
+              <Link href="/admin/roles">
+                <Button variant="ghost" className="w-full justify-start">
+                  <UserCog className="h-4 w-4 mr-3" />
+                  角色与权限
+                </Button>
+              </Link>
+
+              <Link href="/admin/permissions">
+                <Button variant="ghost" className="w-full justify-start">
+                  <Shield className="h-4 w-4 mr-3" />
+                  权限配置
+                </Button>
+              </Link>
+            </div>
 
             <Link href="/admin/settings">
               <Button variant="ghost" className="w-full justify-start">
