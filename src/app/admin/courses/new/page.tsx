@@ -31,14 +31,14 @@ export default function NewCoursePage() {
   const router = useRouter();
   const { addCourse, status, isLoading, error } = useCourseMarket();
   const { address, isConnected } = useAccount(); // 获取当前钱包地址
-  
+
   const curUploadId = useRef<string>(null)
   const curUploadKey = useRef<string>(null)
 
   // 使用状态管理视频上传队列
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadQueue, setUploadQueue] = useState<{index: number, file: File}[]>([]);
-  
+  const [uploadQueue, setUploadQueue] = useState<{ index: number, file: File }[]>([]);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -51,8 +51,8 @@ export default function NewCoursePage() {
   const [formError, setFormError] = useState("");
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'blockchain_success' | 'api_success' | 'error'>('idle');
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<{[key: string]: {progress: number, error: string | null}}>({});
-  
+  const [uploadStatus, setUploadStatus] = useState<{ [key: string]: { progress: number, error: string | null } }>({});
+
   // 确认对话框状态
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [confirmPrice, setConfirmPrice] = useState<bigint>(BigInt(0));
@@ -61,14 +61,14 @@ export default function NewCoursePage() {
   useEffect(() => {
     // 清理过期的上传状态
     cleanupExpiredStates();
-    
+
     // 检查是否有未完成的上传
     const incompleteUploads = getAllUploadStates();
-    
+
     if (incompleteUploads.length > 0) {
       // 显示未完成上传信息
       setFormError(`发现未完成的视频上传，可以继续上传`);
-      
+
       // 3秒后清除错误信息
       setTimeout(() => {
         setFormError("");
@@ -89,7 +89,7 @@ export default function NewCoursePage() {
   // 处理视频上传主函数
   const processVideoUpload = async (index: number, file: File) => {
     const newSections = [...sections];
-    
+
     // 更新上传状态为上传中
     setUploadStatus(prev => ({
       ...prev,
@@ -99,7 +99,7 @@ export default function NewCoursePage() {
     try {
       // 使用工具函数进行视频上传
       const videoUrl = await uploadVideoFile(
-        file, 
+        file,
         (progress) => {
           // 更新上传进度
           setUploadStatus(prev => ({
@@ -113,7 +113,7 @@ export default function NewCoursePage() {
           curUploadId.current = uploadId;
         }
       );
-      
+
       // 更新视频URL和上传状态
       newSections[index].videoUrl = videoUrl;
       setSections(newSections);
@@ -121,7 +121,7 @@ export default function NewCoursePage() {
         ...prev,
         [`video-${index}`]: { progress: 100, error: null }
       }));
-      
+
       return true;
     } catch (error) {
       throw error;
@@ -132,7 +132,7 @@ export default function NewCoursePage() {
     if (uploadQueue.length > 0 && !isUploading) {
       setIsUploading(true);
       const { index, file } = uploadQueue[0];
-      
+
       try {
         // 直接处理当前视频
         await processVideoUpload(index, file);
@@ -187,10 +187,10 @@ export default function NewCoursePage() {
       // 清除视频文件
       delete newSections[index].videoFile;
       // 清除上传状态
-      const newUploadStatus = {...uploadStatus};
+      const newUploadStatus = { ...uploadStatus };
       delete newUploadStatus[`video-${index}`];
       setUploadStatus(newUploadStatus);
-      
+
       // 从上传队列中移除该视频
       setUploadQueue(prev => prev.filter(item => item.index !== index));
     }
@@ -200,22 +200,22 @@ export default function NewCoursePage() {
   // 取消视频上传
   const handleAbortUpload = async (index: number) => {
     console.log('取消视频上传');
-    
+
     const section = sections[index];
     if (section?.videoFile) {
       // 使用全局变量控制机制暂停上传
       pauseUpload(section.videoFile);
       console.log(`通过控制变量取消视频上传: 索引=${index}, fileId=${generateFileId(section.videoFile)}`);
-      
+
       // 更新上传状态
       setUploadStatus(prev => ({
         ...prev,
         [`video-${index}`]: { progress: 0, error: '上传已取消' }
       }));
-      
+
       // 从上传队列中删除
       setUploadQueue(prev => prev.filter(item => item.index !== index));
-      
+
       // 清理上传控制状态
       cleanupUploadControl(section.videoFile);
     }
@@ -238,12 +238,12 @@ export default function NewCoursePage() {
   const removeSection = (index: number) => {
     const newSections = [...sections];
     newSections.splice(index, 1);
-    
+
     // 重新计算顺序
     newSections.forEach((section, idx) => {
       section.order = idx + 1;
     });
-    
+
     setSections(newSections);
   };
 
@@ -260,16 +260,16 @@ export default function NewCoursePage() {
   // 提交表单
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // YiDeng代币只支持整数值
     const priceInTokens = price ? BigInt(parseInt(price)) : BigInt(0);
-    
+
     // 验证价格必须大于0
     if (priceInTokens <= BigInt(0)) {
       setFormError("价格必须大于0");
       return;
     }
-    
+
     // 打开确认对话框并设置价格
     setConfirmPrice(priceInTokens);
     setIsConfirmDialogOpen(true);
@@ -296,15 +296,15 @@ export default function NewCoursePage() {
       if (sections.some(section => !section.title || !section.videoUrl)) {
         throw new Error("章节标题和视频不能为空");
       }
-      
+
       // 步骤1: 通过 API 在数据库中创建课程
       let courseId: number | null = null;
       try {
         setFormStatus('submitting');
         console.log('正在创建课程...');
-        
+
         const response = await CourseService.courseControllerCreateCourse({
-          requestBody:{
+          requestBody: {
             name,
             description,
             price: Number(confirmPrice), // 使用整数价格
@@ -316,59 +316,59 @@ export default function NewCoursePage() {
             }))
           }
         });
-  
+
         if (response.code !== 200) {
           console.error("API创建课程失败:", response);
           throw new Error(response.message || "创建课程失败");
         }
-        
+
         courseId = response.data.id;
         console.log('数据库课程创建成功，ID:', courseId);
-        
+
         // 步骤2: 调用智能合约在链上添加课程
         try {
           console.log('正在链上添加课程...');
           setFormStatus('submitting');
-          
+
           // 使用与前面相同的价格
           console.log('价格:', confirmPrice.toString(), 'YD');
-          
+
           console.log('链上添加课程参数:', {
             courseId: String(courseId),
             name,
             price: confirmPrice.toString()
           });
-          
+
           // 检查用户是否为合约所有者
           const provider = await getEthersProvider();
           if (!provider) throw new Error("无法连接以太坊网络");
-          
+
           const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, provider);
           const owner = await marketContract.owner();
-          
+
           // 如果当前用户不是合约所有者，显示相应提示
           if (address && owner.toLowerCase() !== address.toLowerCase()) {
             console.warn("当前用户不是合约所有者，无法添加课程");
             setFormError("您不是合约所有者，无法添加课程到链上。请联系管理员协助添加该课程。");
-            
+
             // 数据库中已经创建了课程，所以显示部分成功状态
             setFormStatus('api_success');
             return;
           }
-          
+
           // 用户是合约所有者，调用合约添加课程
           const hash = await addCourse(String(courseId), name, confirmPrice);
           setTxHash(hash);
-          
+
           console.log('课程已成功添加到链上，交易哈希:', hash);
           setFormStatus('blockchain_success');
-          
+
         } catch (contractError: any) {
           console.error("链上添加课程失败:", contractError);
-          
+
           // 提取更有用的错误信息
           let errorMessage = "链上添加课程失败";
-          
+
           if (contractError.message) {
             // 常见错误类型处理
             if (contractError.message.includes("execution reverted")) {
@@ -389,7 +389,7 @@ export default function NewCoursePage() {
               errorMessage = contractError.message.slice(0, 100); // 截取前100个字符
             }
           }
-          
+
           // 合约调用失败，调用API删除数据库中的课程
           if (courseId) {
             try {
@@ -409,7 +409,7 @@ export default function NewCoursePage() {
               errorMessage += "。尝试清理数据库数据时出错，请联系管理员处理。";
             }
           }
-          
+
           setFormError(errorMessage);
           setFormStatus('error');
         }
@@ -438,21 +438,19 @@ export default function NewCoursePage() {
     setSections([
       { title: "", description: "", order: 1, videoUrl: "" }
     ]);
-    
+
     // 清空上传状态和交易状态
     setUploadStatus({});
     setTxHash(null);
     setFormStatus('idle');
     setFormError("");
-    
+
     // 滚动到页面顶部
     window.scrollTo(0, 0);
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">创建新课程</h1>
-      
+    <div className="container mx-auto">
       {/* 钱包连接状态提示 */}
       {!isConnected && (
         <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
@@ -462,7 +460,7 @@ export default function NewCoursePage() {
           </p>
         </div>
       )}
-      
+
       <StatusMessage
         formStatus={formStatus}
         isLoading={isLoading}
@@ -471,18 +469,18 @@ export default function NewCoursePage() {
         formError={formError}
         error={error}
       />
-      
+
       {/* 创建成功后显示返回课程列表按钮 */}
       {(formStatus === 'blockchain_success' || formStatus === 'api_success') && (
         <div className="mb-6 flex justify-between">
-          <Button 
+          <Button
             variant="outline"
             onClick={resetForm}
             className="flex items-center"
           >
             继续创建新课程
           </Button>
-          <Button 
+          <Button
             variant="outline"
             onClick={() => router.push("/admin/courses")}
             className="flex items-center"
@@ -491,7 +489,7 @@ export default function NewCoursePage() {
           </Button>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-8">
         <Card className="p-6">
           <CourseBasicInfo
@@ -508,7 +506,7 @@ export default function NewCoursePage() {
             setFormError={setFormError}
           />
         </Card>
-        
+
         <Card className="p-6">
           <CourseSectionList
             sections={sections}
@@ -520,14 +518,14 @@ export default function NewCoursePage() {
             onAbortUpload={handleAbortUpload}
           />
         </Card>
-        
+
         <div className="flex justify-end">
           <Button
             type="submit"
             disabled={
               !isConnected || // 未连接钱包时禁用
-              isSubmitting || 
-              isUploading || 
+              isSubmitting ||
+              isUploading ||
               uploadQueue.length > 0 ||
               sections.some(s => s.videoFile && (!uploadStatus[`video-${sections.indexOf(s)}`] || uploadStatus[`video-${sections.indexOf(s)}`]?.progress < 100))
             }

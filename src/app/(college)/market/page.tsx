@@ -1,25 +1,6 @@
 import { CourseService, CategoryService } from "@/api";
 import { MarketClient } from "@/components/market/MarketClient";
-
-// 从CreateCourseDto派生出Course类型
-interface Course {
-  id: number;
-  title: string;
-  name: string;
-  description: string;
-  coverImage: string;
-  price: number;
-  categoryId: number;
-  category: {
-    id: number;
-    name: string;
-  };
-  isActive: boolean;
-  creator: string;
-  onChainId?: number;
-  updatedAt: string;
-  createdAt: string;
-}
+import { CourseResponseDto as Course } from "@/api/models/CourseResponseDto";
 
 interface Category {
   id: number;
@@ -51,8 +32,8 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
 
   // 处理课程数据
   let courses: Course[] = [];
-  if (courseResult && Array.isArray(courseResult.data.courses)) {
-    courses = courseResult.data.courses;
+  if (courseResult && Array.isArray(courseResult?.data?.items)) {
+    courses = courseResult.data.items as Course[];
   }
 
   // 处理分类数据

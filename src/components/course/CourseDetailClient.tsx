@@ -7,25 +7,7 @@ import { Zap, ShoppingCart, CheckCircle, BookOpen, FileText, ArrowLeft } from "l
 import { CourseSections } from "@/components/course/CourseSections";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
-
-interface Course {
-  id: number;
-  title: string;
-  name: string;
-  description: string;
-  coverImage: string;
-  price: number;
-  categoryId: number;
-  category: {
-    id: number;
-    name: string;
-  };
-  isActive: boolean;
-  creator: string;
-  onChainId?: number;
-  updatedAt: string;
-  createdAt: string;
-}
+import { CourseResponseDto as Course } from "@/api/models/CourseResponseDto";
 
 interface CourseSection {
   id: number;
@@ -73,7 +55,7 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
       <div className="w-full aspect-[21/9] rounded-xl overflow-hidden mb-8 shadow-md relative group">
         <img
           src={course.coverImage || ""}
-          alt={course.title || course.name}
+          alt={course.name}
           className="w-full h-full object-cover"
         />
       </div>
@@ -90,7 +72,7 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
         </div>
 
         <h1 className="text-3xl md:text-4xl font-bold mb-4 transition-colors duration-300 hover:text-primary/90">
-          {course.title || course.name}
+          {course.name}
         </h1>
 
         <p className="text-xl text-foreground/60 mb-6">
