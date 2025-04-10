@@ -1,40 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { CategoryService } from "@/api";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Loader2, MoreVertical, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
-import { CreateCategoryDto, UpdateCategoryDto } from "@/api";
-import { Textarea } from "@/components/ui/textarea";
+import { CategoryList } from "@/components/categories/CategoryList";
+import { CategoryFormDialog } from "@/components/categories/CategoryFormDialog";
+import debounce from "lodash/debounce";
 
 // 分类类型
 interface Category {
@@ -49,383 +20,214 @@ interface Category {
 }
 
 export default function CategoriesPage() {
+  // 跟踪初始加载状态
+  const isInitialMount = useRef(true);
+
   // 状态管理
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
-
-  // 新分类表单状态
-  const [newCategory, setNewCategory] = useState<CreateCategoryDto>({
-    name: "",
-    description: "",
-    icon: "",
-    order: 0,
-    isActive: true,
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    total: 0
   });
 
-  // 编辑分类表单状态
-  const [editCategory, setEditCategory] = useState<UpdateCategoryDto>({
+  // 对话框状态
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"add" | "edit">("add");
+  const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
+
+  // 表单状态
+  const [formData, setFormData] = useState({
     name: "",
     description: "",
     icon: "",
     order: 0,
-    isActive: true,
+    isActive: true
   });
 
   // 获取分类列表
-  const fetchCategories = async () => {
-    setLoading(true);
+  const fetchCategories = async (page = pagination.page, searchQuery = searchTerm) => {
+    setIsLoading(true);
     try {
-      const response = await CategoryService.categoryControllerFindAllCategories({});
-      if (response && response.data) {
-        setCategories(response.data);
+      const params: any = {
+        page,
+        pageSize: pagination.pageSize
+      };
+
+      // 添加搜索参数
+      if (searchQuery) {
+        params.name = searchQuery;
+      }
+
+      const response = await CategoryService.categoryControllerFindAllCategories(params);
+
+      if (response?.data) {
+        const data = response.data;
+        // API可能返回数组或分页对象，需要适配两种情况
+        if (Array.isArray(data)) {
+          // 如果返回的是数组，手动构建分页数据
+          setCategories(data as Category[]);
+          setPagination(prev => ({
+            ...prev,
+            total: data.length,
+          }));
+        } else {
+          // 如果返回的是分页对象，尝试提取分页数据
+          const responseData = data as any;
+          if (responseData.items) {
+            setCategories(responseData.items as Category[]);
+            setPagination({
+              page: responseData.page || 1,
+              pageSize: responseData.pageSize || 10,
+              total: responseData.total || 0
+            });
+          }
+        }
       }
     } catch (error) {
       console.error("获取分类列表失败:", error);
       toast.error("获取分类列表失败");
     } finally {
-      setLoading(false);
+      // 设置初始挂载标志为false
+      isInitialMount.current = false;
+      setIsLoading(false);
     }
   };
 
-  // 组件挂载时获取分类列表
+  // 使用 lodash 的 debounce 实现搜索防抖
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSearch = useCallback(
+    debounce((searchValue: string) => {
+      fetchCategories(1, searchValue);
+    }, 500),
+    []
+  );
+
+  // 初始加载
   useEffect(() => {
+    // 只在组件首次挂载时加载数据
     fetchCategories();
   }, []);
 
-  // 搜索过滤
-  const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (category.description && category.description.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  // 监听搜索词变化，使用防抖自动搜索
+  useEffect(() => {
+    // 跳过首次渲染时的搜索，避免重复请求
+    if (isInitialMount.current) return;
 
-  // 添加分类
-  const handleAddCategory = async () => {
-    try {
-      const response = await CategoryService.categoryControllerCreateCategory({
-        requestBody: newCategory,
-      });
+    debouncedSearch(searchTerm);
+    // 组件卸载时取消防抖
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [searchTerm, debouncedSearch]);
 
-      if (response) {
-        toast.success("分类添加成功");
-        fetchCategories();
-        setShowAddDialog(false);
-        resetNewCategory();
-      }
-    } catch (error) {
-      console.error("添加分类失败:", error);
-      toast.error("添加分类失败");
-    }
+  // 处理搜索输入变化
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
   };
 
-  // 更新分类
-  const handleUpdateCategory = async () => {
-    if (!currentCategory) return;
+  // 手动搜索按钮
+  const handleSearch = () => {
+    fetchCategories(1, searchTerm);
+  };
 
+  // 打开添加分类对话框
+  const openAddDialog = () => {
+    setDialogType("add");
+    setFormData({
+      name: "",
+      description: "",
+      icon: "",
+      order: 0,
+      isActive: true
+    });
+    setDialogOpen(true);
+  };
+
+  // 打开编辑分类对话框
+  const openEditDialog = (category: Category) => {
+    setDialogType("edit");
+    setCurrentCategory(category);
+    setFormData({
+      name: category.name,
+      description: category.description || "",
+      icon: category.icon || "",
+      order: category.order,
+      isActive: category.isActive
+    });
+    setDialogOpen(true);
+  };
+
+  // 表单提交处理
+  const handleSubmit = async (data: typeof formData) => {
     try {
-      const response = await CategoryService.categoryControllerUpdateCategory({
-        id: currentCategory.id,
-        requestBody: editCategory,
-      });
-
-      if (response) {
-        toast.success("分类更新成功");
-        fetchCategories();
-        setShowEditDialog(false);
+      if (dialogType === "add") {
+        await CategoryService.categoryControllerCreateCategory({
+          requestBody: data
+        });
+        toast.success("分类创建成功");
+      } else {
+        if (currentCategory) {
+          await CategoryService.categoryControllerUpdateCategory({
+            id: currentCategory.id,
+            requestBody: data
+          });
+          toast.success("分类更新成功");
+        }
       }
+      setDialogOpen(false);
+      fetchCategories();
     } catch (error) {
-      console.error("更新分类失败:", error);
-      toast.error("更新分类失败");
+      console.error("操作失败:", error);
+      toast.error(`${dialogType === "add" ? "创建" : "更新"}分类失败`);
     }
   };
 
   // 删除分类
-  const handleDeleteCategory = async (id: number) => {
-    if (!window.confirm("确定要删除这个分类吗？删除后无法恢复。")) {
+  const handleDelete = async (id: number) => {
+    if (!confirm("确定要删除这个分类吗？此操作不可撤销。")) {
       return;
     }
 
     try {
-      const response = await CategoryService.categoryControllerDeleteCategory({
-        id,
-      });
-
-      if (response) {
-        toast.success("分类删除成功");
-        fetchCategories();
-      }
+      await CategoryService.categoryControllerDeleteCategory({ id });
+      toast.success("分类删除成功");
+      fetchCategories();
     } catch (error) {
       console.error("删除分类失败:", error);
       toast.error("删除分类失败");
     }
   };
 
-  // 打开编辑对话框
-  const openEditDialog = (category: Category) => {
-    setCurrentCategory(category);
-    setEditCategory({
-      name: category.name,
-      description: category.description,
-      icon: category.icon,
-      order: category.order,
-      isActive: category.isActive,
-    });
-    setShowEditDialog(true);
-  };
-
-  // 重置新分类表单
-  const resetNewCategory = () => {
-    setNewCategory({
-      name: "",
-      description: "",
-      icon: "",
-      order: 0,
-      isActive: true,
-    });
+  // 分页处理
+  const handlePageChange = (newPage: number) => {
+    fetchCategories(newPage);
   };
 
   return (
-    <div className="p-6">
-      {/* 标题和操作栏 */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">课程分类</h1>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="搜索分类..."
-              className="pl-8 w-[250px]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+    <>
+      <CategoryList
+        categories={categories}
+        isLoading={isLoading}
+        pagination={pagination}
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        onSearch={handleSearch}
+        onAddNew={openAddDialog}
+        onEdit={openEditDialog}
+        onDelete={handleDelete}
+        onPageChange={handlePageChange}
+      />
 
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                添加分类
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>添加新分类</DialogTitle>
-                <DialogDescription>
-                  添加一个新的课程分类，填写下列信息。
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">分类名称 *</Label>
-                  <Input
-                    id="name"
-                    value={newCategory.name}
-                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                    placeholder="输入分类名称"
-                    required
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="description">分类描述</Label>
-                  <Textarea
-                    id="description"
-                    value={newCategory.description || ""}
-                    onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                    placeholder="输入分类描述（可选）"
-                    className="min-h-[100px]"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="icon">图标</Label>
-                  <Input
-                    id="icon"
-                    value={newCategory.icon || ""}
-                    onChange={(e) => setNewCategory({ ...newCategory, icon: e.target.value })}
-                    placeholder="输入图标名称或URL（可选）"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="order">排序</Label>
-                  <Input
-                    id="order"
-                    type="number"
-                    value={newCategory.order?.toString() || "0"}
-                    onChange={(e) => setNewCategory({ ...newCategory, order: parseInt(e.target.value) })}
-                    placeholder="数字越小排序越靠前"
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isActive"
-                    checked={newCategory.isActive}
-                    onCheckedChange={(checked: boolean) => setNewCategory({ ...newCategory, isActive: checked })}
-                  />
-                  <Label htmlFor="isActive">启用分类</Label>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowAddDialog(false)}>取消</Button>
-                <Button onClick={handleAddCategory} disabled={!newCategory.name}>添加分类</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      {/* 分类列表 */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>名称</TableHead>
-              <TableHead>描述</TableHead>
-              <TableHead>排序</TableHead>
-              <TableHead>状态</TableHead>
-              <TableHead>创建时间</TableHead>
-              <TableHead className="text-right">操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-10">
-                  <div className="flex justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                  <div className="mt-2 text-sm text-muted-foreground">加载中...</div>
-                </TableCell>
-              </TableRow>
-            ) : filteredCategories.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-10">
-                  <div className="text-muted-foreground">
-                    {searchQuery ? "没有找到匹配的分类" : "暂无分类数据"}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredCategories.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell>{category.id}</TableCell>
-                  <TableCell className="font-medium">{category.name}</TableCell>
-                  <TableCell className="max-w-xs truncate">{category.description || "-"}</TableCell>
-                  <TableCell>{category.order}</TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${category.isActive
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
-                      }`}>
-                      {category.isActive ? "启用" : "禁用"}
-                    </span>
-                  </TableCell>
-                  <TableCell>{new Date(category.createdAt).toLocaleString()}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">打开菜单</span>
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>操作</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => openEditDialog(category)}>
-                          编辑
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDeleteCategory(category.id)} className="text-red-600">
-                          删除
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* 编辑分类对话框 */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>编辑分类</DialogTitle>
-            <DialogDescription>
-              修改分类信息，所有字段都是可选的。
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-name">分类名称</Label>
-              <Input
-                id="edit-name"
-                value={editCategory.name || ""}
-                onChange={(e) => setEditCategory({ ...editCategory, name: e.target.value })}
-                placeholder="输入分类名称"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="edit-description">分类描述</Label>
-              <Textarea
-                id="edit-description"
-                value={editCategory.description || ""}
-                onChange={(e) => setEditCategory({ ...editCategory, description: e.target.value })}
-                placeholder="输入分类描述（可选）"
-                className="min-h-[100px]"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="edit-icon">图标</Label>
-              <Input
-                id="edit-icon"
-                value={editCategory.icon || ""}
-                onChange={(e) => setEditCategory({ ...editCategory, icon: e.target.value })}
-                placeholder="输入图标名称或URL（可选）"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="edit-order">排序</Label>
-              <Input
-                id="edit-order"
-                type="number"
-                value={editCategory.order?.toString() || "0"}
-                onChange={(e) => setEditCategory({ ...editCategory, order: parseInt(e.target.value) })}
-                placeholder="数字越小排序越靠前"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="edit-isActive"
-                checked={editCategory.isActive}
-                onCheckedChange={(checked: boolean) => setEditCategory({ ...editCategory, isActive: checked })}
-              />
-              <Label htmlFor="edit-isActive">启用分类</Label>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>取消</Button>
-            <Button onClick={handleUpdateCategory}>保存更改</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+      <CategoryFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        dialogType={dialogType}
+        initialData={formData}
+        onSubmit={handleSubmit}
+      />
+    </>
   );
 } 

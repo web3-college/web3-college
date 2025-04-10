@@ -1,26 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Zap, ArrowRight } from "lucide-react";
+import { CourseResponseDto as Course } from "@/api/models/CourseResponseDto";
 import Link from "next/link";
-
-interface Course {
-  id: number;
-  title: string;
-  name: string;
-  description: string;
-  coverImage: string;
-  price: number;
-  categoryId: number;
-  category: {
-    id: number;
-    name: string;
-  };
-  isActive: boolean;
-  creator: string;
-  onChainId?: number;
-  updatedAt: string;
-  createdAt: string;
-}
 
 interface CourseListProps {
   courses: Course[];
@@ -54,14 +36,14 @@ export function CourseList({ courses }: CourseListProps) {
               <div className="aspect-video overflow-hidden relative">
                 <img
                   src={course.coverImage || "https://via.placeholder.com/600x400?text=课程图片"}
-                  alt={course.title || course.name}
+                  alt={course.name}
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-300"></div>
               </div>
 
               <div className="p-6 space-y-4">
-                <h3 className="text-xl font-semibold line-clamp-1">{course.title || course.name}</h3>
+                <h3 className="text-xl font-semibold line-clamp-1">{course.name}</h3>
 
                 <p className="text-foreground/40 text-sm line-clamp-2">{course.description}</p>
 

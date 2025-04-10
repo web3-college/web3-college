@@ -37,7 +37,7 @@ export function CourseBasicInfo({
   description,
   setDescription,
   price,
-  setPrice, 
+  setPrice,
   categoryId,
   setCategoryId,
   coverImage,
@@ -50,11 +50,11 @@ export function CourseBasicInfo({
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const result = await CategoryService.categoryControllerFindAllCategories({
+      const result = await CategoryService.categoryControllerFindAllCategoriesWithoutPagination({
         isActive: true
       });
       console.log("分类数据:", result); // 调试输出
-      
+
       if (result && result.code === 200 && Array.isArray(result.data)) {
         setCategories(result.data);
       } else if (result && Array.isArray(result.data)) {
@@ -92,7 +92,7 @@ export function CourseBasicInfo({
             required
           />
         </div>
-        
+
         <div>
           <Label htmlFor="price">价格 (YIDENG) *</Label>
           <Input
@@ -129,11 +129,11 @@ export function CourseBasicInfo({
             价格将以YIDENG代币支付，仅支持整数金额 (例如: 100 YD)
           </p>
         </div>
-        
+
         <div>
           <Label htmlFor="category">课程分类 *</Label>
-          <Select 
-            value={categoryId} 
+          <Select
+            value={categoryId}
             onValueChange={setCategoryId}
           >
             <SelectTrigger id="category" className="mt-1">
@@ -154,7 +154,7 @@ export function CourseBasicInfo({
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="md:col-span-2">
           <Label htmlFor="description">课程描述</Label>
           <Textarea
@@ -166,7 +166,7 @@ export function CourseBasicInfo({
             placeholder="详细描述课程内容和学习目标"
           />
         </div>
-        
+
         <ImageUploader
           imageUrl={coverImage}
           setImageUrl={setCoverImage}

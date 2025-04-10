@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CourseListResponseDto } from '../models/CourseListResponseDto';
+import type { CourseResponseDto } from '../models/CourseResponseDto';
 import type { CreateCourseDto } from '../models/CreateCourseDto';
 import type { CreateCourseSectionDto } from '../models/CreateCourseSectionDto';
 import type { UpdateCourseDto } from '../models/UpdateCourseDto';
@@ -32,16 +34,29 @@ export class CourseService {
   }
   /**
    * 获取课程列表
-   * 分页获取课程列表，可按分类和状态筛选
-   * @returns any 课程列表
+   * 分页获取课程列表，可按分类、状态和名称筛选
+   * @returns any 获取课程列表成功
    * @throws ApiError
    */
   public static courseControllerFindAllCourses({
+    page = 1,
+    pageSize = 10,
+    name,
     isActive,
     categoryId,
-    limit,
-    page,
   }: {
+    /**
+     * 页码
+     */
+    page?: number,
+    /**
+     * 每页数量
+     */
+    pageSize?: number,
+    /**
+     * 课程名称
+     */
+    name?: string,
     /**
      * 是否激活
      */
@@ -50,47 +65,42 @@ export class CourseService {
      * 分类ID
      */
     categoryId?: number,
-    /**
-     * 每页数量
-     */
-    limit?: number,
-    /**
-     * 页码
-     */
-    page?: number,
-  }): CancelablePromise<any> {
+  }): CancelablePromise<{
+    code?: number;
+    msg?: string;
+    data?: CourseListResponseDto;
+  }> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/api/course',
       query: {
+        'page': page,
+        'pageSize': pageSize,
+        'name': name,
         'isActive': isActive,
         'categoryId': categoryId,
-        'limit': limit,
-        'page': page,
       },
     });
   }
   /**
    * 获取课程详情
-   * @returns any 课程详情
+   * @returns any 获取课程详情成功
    * @throws ApiError
    */
   public static courseControllerFindCourseById({
     id,
   }: {
-    /**
-     * 课程ID
-     */
     id: number,
-  }): CancelablePromise<any> {
+  }): CancelablePromise<{
+    code?: number;
+    msg?: string;
+    data?: CourseResponseDto;
+  }> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/api/course/{id}',
       path: {
         'id': id,
-      },
-      errors: {
-        404: `课程不存在`,
       },
     });
   }
@@ -104,9 +114,6 @@ export class CourseService {
     id,
     requestBody,
   }: {
-    /**
-     * 课程ID
-     */
     id: number,
     requestBody: UpdateCourseDto,
   }): CancelablePromise<any> {
@@ -132,9 +139,6 @@ export class CourseService {
   public static courseControllerDeleteCourse({
     id,
   }: {
-    /**
-     * 课程ID
-     */
     id: number,
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
@@ -157,9 +161,6 @@ export class CourseService {
     courseId,
     requestBody,
   }: {
-    /**
-     * 课程ID
-     */
     courseId: number,
     requestBody: CreateCourseSectionDto,
   }): CancelablePromise<any> {
@@ -184,9 +185,6 @@ export class CourseService {
   public static courseControllerFindAllCourseSections({
     courseId,
   }: {
-    /**
-     * 课程ID
-     */
     courseId: number,
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
@@ -201,28 +199,41 @@ export class CourseService {
     });
   }
   /**
-   * 获取创建者的课程列表
-   * @returns any 课程列表
+   * 获取创建者的课程
+   * 获取指定创建者的所有课程
+   * @returns CourseListResponseDto 课程列表
    * @throws ApiError
    */
   public static courseControllerFindCoursesByCreator({
     address,
-    limit,
-    page,
+    page = 1,
+    pageSize = 10,
+    name,
+    isActive,
+    categoryId,
   }: {
-    /**
-     * 创建者钱包地址
-     */
     address: string,
-    /**
-     * 每页数量
-     */
-    limit?: number,
     /**
      * 页码
      */
     page?: number,
-  }): CancelablePromise<any> {
+    /**
+     * 每页数量
+     */
+    pageSize?: number,
+    /**
+     * 课程名称
+     */
+    name?: string,
+    /**
+     * 是否激活
+     */
+    isActive?: boolean,
+    /**
+     * 分类ID
+     */
+    categoryId?: number,
+  }): CancelablePromise<CourseListResponseDto> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/api/course/creator/{address}',
@@ -230,8 +241,11 @@ export class CourseService {
         'address': address,
       },
       query: {
-        'limit': limit,
         'page': page,
+        'pageSize': pageSize,
+        'name': name,
+        'isActive': isActive,
+        'categoryId': categoryId,
       },
     });
   }

@@ -1,30 +1,14 @@
 "use client";
 
-import { useState, useEffect, useTransition, useRef } from "react";
+import { useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { CourseResponseDto as Course } from "@/api/models/CourseResponseDto";
 import VideoPlayer from "./VideoPlayer";
 
-interface Course {
-  id: number;
-  title: string;
-  name: string;
-  description: string;
-  coverImage: string;
-  price: number;
-  categoryId: number;
-  category: {
-    id: number;
-    name: string;
-  };
-  isActive: boolean;
-  creator: string;
-  onChainId?: number;
-  updatedAt: string;
-  createdAt: string;
-}
+
 
 interface CourseSection {
   id: number;

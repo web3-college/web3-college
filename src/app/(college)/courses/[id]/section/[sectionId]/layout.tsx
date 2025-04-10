@@ -42,13 +42,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     if (!currentSection) {
       return {
-        title: course.title || course.name,
+        title: course.name,
         description: course.description
       };
     }
 
     return {
-      title: `${currentSection.title} - ${course.title || course.name}`,
+      title: `${currentSection.title} - ${course.name}`,
       description: currentSection.description || course.description
     };
   } catch (e) {

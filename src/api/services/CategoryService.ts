@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CategoryListResponseDto } from '../models/CategoryListResponseDto';
 import type { CreateCategoryDto } from '../models/CreateCategoryDto';
 import type { UpdateCategoryDto } from '../models/UpdateCategoryDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -31,23 +32,77 @@ export class CategoryService {
   }
   /**
    * 获取所有分类
-   * 获取所有课程分类列表
+   * 获取所有课程分类列表，支持分页和名称搜索
    * @returns any 获取分类列表成功
    * @throws ApiError
    */
   public static categoryControllerFindAllCategories({
+    page = 1,
+    pageSize = 10,
+    name,
     isActive,
   }: {
     /**
-     * 是否只获取激活的分类
+     * 页码
+     */
+    page?: number,
+    /**
+     * 每页数量
+     */
+    pageSize?: number,
+    /**
+     * 分类名称
+     */
+    name?: string,
+    /**
+     * 是否激活
      */
     isActive?: boolean,
-  }): CancelablePromise<any> {
+  }): CancelablePromise<{
+    code?: number;
+    msg?: string;
+    data?: CategoryListResponseDto;
+  }> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/api/category',
       query: {
+        'page': page,
+        'pageSize': pageSize,
+        'name': name,
         'isActive': isActive,
+      },
+    });
+  }
+  /**
+   * 获取所有分类（不分页）
+   * 获取所有课程分类列表，不分页，可按激活状态和名称筛选，适用于下拉菜单等场景
+   * @returns any 获取分类列表成功
+   * @throws ApiError
+   */
+  public static categoryControllerFindAllCategoriesWithoutPagination({
+    isActive,
+    name,
+  }: {
+    /**
+     * 是否激活
+     */
+    isActive?: boolean,
+    /**
+     * 分类名称
+     */
+    name?: string,
+  }): CancelablePromise<{
+    code?: number;
+    msg?: string;
+    data?: CategoryListResponseDto;
+  }> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/category/list-all',
+      query: {
+        'isActive': isActive,
+        'name': name,
       },
     });
   }
@@ -138,26 +193,28 @@ export class CategoryService {
    */
   public static categoryControllerFindCoursesByCategory({
     id,
+    page = 1,
+    pageSize = 10,
+    name,
     isActive,
-    limit,
-    page,
   }: {
-    /**
-     * 分类ID
-     */
     id: number,
-    /**
-     * 是否只获取激活的课程
-     */
-    isActive?: boolean,
-    /**
-     * 每页数量
-     */
-    limit?: any,
     /**
      * 页码
      */
-    page?: any,
+    page?: number,
+    /**
+     * 每页数量
+     */
+    pageSize?: number,
+    /**
+     * 分类名称
+     */
+    name?: string,
+    /**
+     * 是否激活
+     */
+    isActive?: boolean,
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
@@ -166,9 +223,10 @@ export class CategoryService {
         'id': id,
       },
       query: {
-        'isActive': isActive,
-        'limit': limit,
         'page': page,
+        'pageSize': pageSize,
+        'name': name,
+        'isActive': isActive,
       },
       errors: {
         404: `分类不存在`,

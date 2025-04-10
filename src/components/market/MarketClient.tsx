@@ -6,27 +6,8 @@ import { Button } from "@/components/ui/button";
 import { CourseSkeletons } from "./CourseSkeletons";
 import { CourseList } from "./CourseList";
 import { CourseService } from "@/api";
+import { CourseResponseDto as Course } from "@/api/models/CourseResponseDto";
 import { toast } from "sonner";
-import { AuthService } from "@/api/services/AuthService";
-
-interface Course {
-  id: number;
-  title: string;
-  name: string;
-  description: string;
-  coverImage: string;
-  price: number;
-  categoryId: number;
-  category: {
-    id: number;
-    name: string;
-  };
-  isActive: boolean;
-  creator: string;
-  onChainId?: number;
-  updatedAt: string;
-  createdAt: string;
-}
 
 interface Category {
   id: number;
@@ -70,8 +51,8 @@ export function MarketClient({ courses, categories }: MarketClientProps) {
 
       const result = await CourseService.courseControllerFindAllCourses(params);
 
-      if (result && result?.data?.courses.length > 0) {
-        setDisplayedCourses(result.data.courses);
+      if (result?.data?.items && result.data.items.length > 0) {
+        setDisplayedCourses(result.data.items as Course[]);
       } else {
         setDisplayedCourses([]);
         toast.warning("未找到课程", {

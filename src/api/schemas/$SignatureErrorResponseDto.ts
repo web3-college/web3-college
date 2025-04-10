@@ -2,22 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $BaseResponseDto = {
+export const $SignatureErrorResponseDto = {
   properties: {
-    code: {
+    status: {
       type: 'number',
       isRequired: true,
     },
-    msg: {
+    message: {
       type: 'string',
-      isRequired: true,
-    },
-    data: {
-      type: 'dictionary',
-      contains: {
-        properties: {
-        },
-      },
       isRequired: true,
     },
   },
