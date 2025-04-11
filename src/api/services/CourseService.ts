@@ -6,6 +6,7 @@ import type { CourseListResponseDto } from '../models/CourseListResponseDto';
 import type { CourseResponseDto } from '../models/CourseResponseDto';
 import type { CreateCourseDto } from '../models/CreateCourseDto';
 import type { CreateCourseSectionDto } from '../models/CreateCourseSectionDto';
+import type { SavePurchaseRecordDto } from '../models/SavePurchaseRecordDto';
 import type { UpdateCourseDto } from '../models/UpdateCourseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -246,6 +247,27 @@ export class CourseService {
         'name': name,
         'isActive': isActive,
         'categoryId': categoryId,
+      },
+    });
+  }
+  /**
+   * 保存购买记录
+   * 保存用户购买课程的记录
+   * @returns any 购买记录保存成功
+   * @throws ApiError
+   */
+  public static courseControllerSavePurchaseRecord({
+    requestBody,
+  }: {
+    requestBody: SavePurchaseRecordDto,
+  }): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/course/purchase',
+      body: requestBody,
+      mediaType: 'application/json',
+      errors: {
+        404: `课程不存在`,
       },
     });
   }

@@ -6,27 +6,39 @@ import { usePathname } from "next/navigation"
 import { Menu, X, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ConnectKitButton } from "connectkit"
+import { ConnectKitButton, useSIWE } from "connectkit"
+import { AuthService } from "@/api/services/AuthService"
 
 export function Navbar() {
+  const [navLinks, setNavLinks] = useState([
+    { name: "首页", path: "/" },
+    { name: "购买课程", path: "/market" },
+    { name: "课程中心", path: "/courses" },
+  ])
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
+
+  const checkAdmin = async () => {
+    const isAdmin = await AuthService.authControllerIsAdmin()
+    if (isAdmin.data?.hasAccess) {
+      setNavLinks([...navLinks, { name: "后台管理", path: "/admin" }])
+    } else {
+      setNavLinks(navLinks.filter((link) => link.name !== "后台管理"))
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10)
     }
-
     window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    window.addEventListener("checkAdmin", checkAdmin)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("checkAdmin", checkAdmin)
+    }
   }, [])
-
-  const navLinks = [
-    { name: "首页", path: "/" },
-    { name: "购买课程", path: "/market" },
-    { name: "课程中心", path: "/courses" },
-  ]
 
   const isActive = (path: string) => pathname === path
 

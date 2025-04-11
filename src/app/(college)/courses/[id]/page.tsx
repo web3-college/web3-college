@@ -39,15 +39,10 @@ export default async function CourseDetailPage({
 
   const sections = sectionsResponse.data || [];
 
-  // 按章节顺序排序
-  const sortedSections = [...sections].sort(
-    (a: CourseSection, b: CourseSection) => a.order - b.order
-  );
-
   return (
     <CourseDetailClient
       course={course}
-      sections={sortedSections}
+      sections={sections}
     />
   );
 } 

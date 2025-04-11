@@ -6,10 +6,10 @@ import { CourseSection, CourseSectionData } from "./CourseSection";
 
 interface CourseSectionListProps {
   sections: CourseSectionData[];
-  uploadStatus: {[key: string]: {progress: number, error: string | null}};
+  uploadStatus: { [key: string]: { progress: number, error: string | null } };
   onAddSection: () => void;
   onRemoveSection: (index: number) => void;
-  onUpdateSection: (index: number, field: keyof CourseSectionData, value: string) => void;
+  onUpdateSection: (index: number, field: keyof CourseSectionData, value: string | boolean) => void;
   onVideoFileChange: (index: number, file: File | null) => void;
   onAbortUpload: (index: number) => void;
 }
@@ -37,7 +37,7 @@ export function CourseSectionList({
           <Plus className="h-4 w-4 mr-1" /> 添加章节
         </Button>
       </div>
-      
+
       <div className="space-y-6">
         {sections.map((section, index) => (
           <CourseSection

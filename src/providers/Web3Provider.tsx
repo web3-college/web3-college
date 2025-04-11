@@ -51,7 +51,7 @@ const siweConfig: SIWEConfig = {
 
     const response = await AuthService.authControllerGetUserInfo();
     console.log(response.data);
-
+    window.dispatchEvent(new CustomEvent("checkAdmin"))
     return response.data?.address && response.data?.chainId ? {
       address: response.data?.address as `0x${string}`,
       chainId: response.data?.chainId as number,
@@ -62,7 +62,7 @@ const siweConfig: SIWEConfig = {
 
     const response = await AuthService.authControllerLogout();
     console.log(response.data);
-
+    window.dispatchEvent(new CustomEvent("checkAdmin"))
     return response.data?.success as boolean;
   },
 }

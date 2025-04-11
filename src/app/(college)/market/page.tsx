@@ -27,7 +27,7 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
 
   const [courseResult, categoryResult] = await Promise.all([
     CourseService.courseControllerFindAllCourses(coursesParams),
-    CategoryService.categoryControllerFindAllCategories({ isActive: true })
+    CategoryService.categoryControllerFindAllCategoriesWithoutPagination({ isActive: true })
   ]);
 
   // 处理课程数据

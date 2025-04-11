@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Video, X } from "lucide-react";
+import { formatDuration } from "@/lib/file";
 
 interface VideoUploaderProps {
   videoUrl: string;
@@ -15,6 +16,7 @@ interface VideoUploaderProps {
     progress: number;
     error: string | null;
   };
+  duration?: number;
 }
 
 export function VideoUploader({
@@ -23,7 +25,8 @@ export function VideoUploader({
   onVideoUrlChange,
   onVideoFileChange,
   uploadStatus,
-  onAbortUpload
+  onAbortUpload,
+  duration
 }: VideoUploaderProps) {
   const [videoFile, setVideoFile] = useState<File | null>(null);
 
@@ -40,14 +43,14 @@ export function VideoUploader({
   const handleVideoDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       // 验证文件类型
       if (!file.type.match('video.*')) {
         return; // 错误处理由父组件完成
       }
-      
+
       setVideoFile(file);
       onVideoFileChange(file);
     }
@@ -76,8 +79,8 @@ export function VideoUploader({
   const renderProgressBar = (progress: number) => {
     return (
       <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div 
-          className="bg-blue-600 h-2.5 rounded-full" 
+        <div
+          className="bg-blue-600 h-2.5 rounded-full"
           style={{ width: `${progress}%` }}
         ></div>
       </div>
@@ -93,6 +96,11 @@ export function VideoUploader({
             <span className="text-sm truncate max-w-[200px]">
               {videoFile.name}
             </span>
+            {duration && (
+              <span className="ml-2 text-xs text-gray-500">
+                {formatDuration(duration)}
+              </span>
+            )}
           </div>
           <Button
             type="button"
@@ -104,7 +112,7 @@ export function VideoUploader({
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
+
         {/* 上传进度指示器 */}
         {uploadStatus && (
           <div className="mt-2">
@@ -129,7 +137,7 @@ export function VideoUploader({
     <div className="mt-2">
       <div className="flex items-center space-x-2">
         <label className="flex-1">
-          <div 
+          <div
             className="flex items-center justify-center border border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:bg-gray-50"
             onDrop={handleVideoDrop}
             onDragOver={handleDragOver}
@@ -151,9 +159,9 @@ export function VideoUploader({
             </div>
           </div>
         </label>
-        
+
         <span className="text-gray-400">或</span>
-        
+
         <Input
           className="flex-1"
           placeholder="输入视频URL"
@@ -161,7 +169,7 @@ export function VideoUploader({
           onChange={(e) => onVideoUrlChange(e.target.value)}
         />
       </div>
-      
+
       {/* 显示上传错误 */}
       {uploadStatus?.error && (
         <div className="mt-2 text-xs text-red-500">

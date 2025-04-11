@@ -85,11 +85,11 @@ export class CategoryService {
     name,
   }: {
     /**
-     * 是否激活
+     * 是否只获取激活的分类
      */
     isActive?: boolean,
     /**
-     * 分类名称
+     * 分类名称（模糊搜索）
      */
     name?: string,
   }): CancelablePromise<{

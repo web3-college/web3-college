@@ -7,14 +7,14 @@ import { toast } from "sonner";
 import { PlayCircle, Lock, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-
+import { formatDuration } from "@/lib/file";
+import { useSIWE } from "connectkit";
 interface CourseSection {
   id: number;
   title: string;
   description: string | null;
   order: number;
-  videoUrl: string | null;
-  courseDuration?: string; // 如 "10:30"
+  duration?: number; // 视频时长（秒）
   isPreview?: boolean;
   isCompleted?: boolean;
 }
@@ -29,6 +29,7 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
   const [sections, setSections] = useState<CourseSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState<string | undefined>("section-0"); // 默认展开第一个
+  const { isSignedIn } = useSIWE();
 
   const fetchSections = async () => {
     try {
@@ -43,16 +44,7 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
           (a: CourseSection, b: CourseSection) => a.order - b.order
         );
 
-        // 为示例添加预览章节
-        const enhancedSections = sortedSections.map((section, index) => ({
-          ...section,
-          // 假设第一章节是免费预览
-          isPreview: index === 0,
-          // 假设视频持续时间
-          courseDuration: `${Math.floor(Math.random() * 20) + 5}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`
-        }));
-
-        setSections(enhancedSections);
+        setSections(sortedSections);
       } else {
         setSections([]);
       }
@@ -67,6 +59,11 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
   };
 
   useEffect(() => {
+    if (!isSignedIn) {
+      toast("需要登录", {
+        description: "请先登录才能观看课程",
+      });
+    }
     fetchSections();
   }, [courseId]);
 
@@ -79,13 +76,6 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
           label: "购买课程",
           onClick: () => console.log("准备购买课程")
         }
-      });
-      return;
-    }
-
-    if (!section.videoUrl) {
-      toast.error("视频未就绪", {
-        description: "该章节视频尚未上传或处理"
       });
       return;
     }
@@ -140,9 +130,9 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
                 <h3 className="font-medium text-base">
                   {section.title}
                 </h3>
-                {section.courseDuration && (
+                {section.duration && (
                   <span className="text-xs text-foreground/40">
-                    {section.courseDuration}
+                    {formatDuration(section.duration)}
                   </span>
                 )}
               </div>
@@ -160,7 +150,7 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
               </p>
               <Button
                 onClick={() => playSection(section)}
-                disabled={!isPurchased && !section.isPreview}
+                disabled={(!isPurchased && !section.isPreview) || !isSignedIn}
                 className="transition-all duration-300 hover:scale-105 active:scale-95"
                 variant={isPurchased || section.isPreview ? "default" : "outline"}
               >
