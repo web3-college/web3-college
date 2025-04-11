@@ -111,10 +111,27 @@ export function useYiDengToken() {
       setIsLoading(false)
     }
   }, [isConnected])
+
+  // 批准课程市场合约使用代币
+  const approve = useCallback(async (price: bigint) => {
+    if (!isConnected) throw new Error('请先连接钱包')
+    try {
+      const signer = await getEthersSigner()
+      if (!signer) throw new Error('无法获取签名者')
+      // 连接YiDengToken合约
+      const tokenContract = YiDengToken__factory.connect(YIDENG_TOKEN_ADDRESS, signer)
+      const tx = await tokenContract.approve(COURSE_MARKET_ADDRESS, price)
+      const receipt = await tx.wait()
+      console.log('批准交易已确认:', receipt)
+    } catch (error) {
+      console.error('批准失败:', error)
+    }
+  }, [isConnected])
   
   return {
     getBalance,
     exchangeTokens,
+    approve,
     status,
     error,
     isLoading
@@ -189,7 +206,38 @@ export function useCourseMarket() {
       return []
     }
   }, [isConnected])
-  
+
+  // 批准课程市场合约使用代币
+  const approve = useCallback(async (price: bigint) => {
+    if (!isConnected) throw new Error('请先连接钱包')
+    try {
+      const signer = await getEthersSigner()
+      if (!signer) throw new Error('无法获取签名者')
+      // 连接YiDengToken合约
+      const tokenContract = YiDengToken__factory.connect(YIDENG_TOKEN_ADDRESS, signer)
+      const tx = await tokenContract.approve(COURSE_MARKET_ADDRESS, price)
+      const receipt = await tx.wait()
+      console.log('批准交易已确认:', receipt)
+    } catch (error) {
+      console.error('批准失败:', error)
+    }
+  }, [isConnected])
+
+  const getAllowance = useCallback(async () => {
+    if (!isConnected) throw new Error('请先连接钱包')
+    try {
+      const signer = await getEthersSigner()
+      if (!signer) throw new Error('无法获取签名者')
+      // 连接YiDengToken合约
+      const tokenContract = YiDengToken__factory.connect(YIDENG_TOKEN_ADDRESS, signer)
+      const allowance = await tokenContract.allowance(signer.getAddress(), COURSE_MARKET_ADDRESS)
+      console.log('代币授权额度:', allowance)
+      return allowance
+    } catch (error) {
+      console.error('获取代币授权额度失败:', error)
+    }
+  }, [isConnected])
+
   // 购买课程
   const purchaseCourse = useCallback(async (web2CourseId: string) => {
     if (!isConnected) throw new Error('请先连接钱包')
@@ -201,7 +249,7 @@ export function useCourseMarket() {
       
       const signer = await getEthersSigner()
       if (!signer) throw new Error('无法获取签名者')
-      
+
       // 连接CourseMarket合约
       const marketContract = CourseMarket__factory.connect(COURSE_MARKET_ADDRESS, signer)
       
@@ -339,6 +387,8 @@ export function useCourseMarket() {
     purchaseCourse,
     hasCourse,
     addCourse,
+    approve,
+    getAllowance,
     status,
     isLoading,
     error

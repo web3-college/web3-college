@@ -91,4 +91,25 @@ export class AuthService {
       url: '/api/auth/logout',
     });
   }
+  /**
+   * 检查用户是否有后台权限
+   * 检查当前登录用户是否拥有后台管理权限（角色包含super、admin或manager）
+   * @returns any 权限检查成功
+   * @throws ApiError
+   */
+  public static authControllerIsAdmin(): CancelablePromise<{
+    code?: number;
+    msg?: string;
+    data?: {
+      hasAccess?: boolean;
+    };
+  }> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/auth/isAdmin',
+      errors: {
+        401: `用户未登录`,
+      },
+    });
+  }
 }

@@ -24,6 +24,7 @@ import { CourseMarket__factory } from "@/types/contracts/factories";
 // 导入确认对话框组件
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { getEthersProvider } from "@/lib/contract-hooks"
+import { getVideoDuration } from "@/lib/file";
 
 
 
@@ -158,7 +159,7 @@ export default function NewCoursePage() {
   }, [processQueue]);
 
   // 处理视频文件变更
-  const handleVideoFileChange = (index: number, file: File | null) => {
+  const handleVideoFileChange = async (index: number, file: File | null) => {
     const newSections = [...sections];
     if (file) {
       // 验证文件类型
@@ -174,18 +175,33 @@ export default function NewCoursePage() {
         return;
       }
 
-      newSections[index].videoFile = file;
-      // 初始化该视频的上传状态
-      setUploadStatus(prev => ({
-        ...prev,
-        [`video-${index}`]: { progress: 0, error: null }
-      }));
+      try {
+        // 获取视频时长
+        const duration = await getVideoDuration(file);
+        console.log(`视频时长: ${duration}秒`);
 
-      // 添加到上传队列
-      setUploadQueue(prev => [...prev, { index, file }]);
+        // 更新视频信息
+        newSections[index].videoFile = file;
+        newSections[index].duration = duration; // 添加时长信息
+
+        // 初始化该视频的上传状态
+        setUploadStatus(prev => ({
+          ...prev,
+          [`video-${index}`]: { progress: 0, error: null }
+        }));
+
+        // 添加到上传队列
+        setUploadQueue(prev => [...prev, { index, file }]);
+      } catch (error) {
+        console.error('获取视频时长失败:', error);
+        setFormError('获取视频时长失败，请重新选择视频');
+        return;
+      }
     } else {
       // 清除视频文件
       delete newSections[index].videoFile;
+      delete newSections[index].duration; // 清除时长信息
+
       // 清除上传状态
       const newUploadStatus = { ...uploadStatus };
       delete newUploadStatus[`video-${index}`];
@@ -248,7 +264,7 @@ export default function NewCoursePage() {
   };
 
   // 更新章节字段
-  const updateSection = (index: number, field: keyof CourseSectionData, value: string) => {
+  const updateSection = (index: number, field: keyof CourseSectionData, value: string | boolean) => {
     const newSections = [...sections];
     newSections[index] = {
       ...newSections[index],
@@ -311,8 +327,13 @@ export default function NewCoursePage() {
             categoryId: parseInt(categoryId),
             coverImage,
             creator: address || "",
-            sections: sections.map(({ title, description, order, videoUrl }) => ({
-              title, description, order, videoUrl
+            sections: sections.map(({ title, description, order, videoUrl, duration, isPreview }) => ({
+              title,
+              description,
+              order,
+              videoUrl,
+              duration: duration || 0, // 添加视频时长，如果没有则为0
+              isPreview: isPreview || false // 添加预览章节标记
             }))
           }
         });

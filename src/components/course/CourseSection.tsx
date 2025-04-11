@@ -14,6 +14,8 @@ export interface CourseSectionData {
   videoUrl: string;
   videoFile?: File;
   uploadId?: string;
+  duration?: number; // 视频时长（秒）
+  isPreview?: boolean; // 是否为预览章节
 }
 
 interface CourseSectionProps {
@@ -23,7 +25,7 @@ interface CourseSectionProps {
     progress: number;
     error: string | null;
   };
-  onUpdate: (index: number, field: keyof CourseSectionData, value: string) => void;
+  onUpdate: (index: number, field: keyof CourseSectionData, value: string | boolean) => void;
   onRemove: (index: number) => void;
   onVideoFileChange: (index: number, file: File | null) => void;
   onAbortUpload: (index: number) => void;
@@ -52,7 +54,7 @@ export function CourseSection({
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-4">
         <div>
           <Label htmlFor={`section-title-${index}`}>章节标题 *</Label>
@@ -65,7 +67,7 @@ export function CourseSection({
             required
           />
         </div>
-        
+
         <div>
           <Label htmlFor={`section-description-${index}`}>章节描述</Label>
           <Textarea
@@ -77,17 +79,31 @@ export function CourseSection({
             placeholder="简要描述本章节内容"
           />
         </div>
-        
+
         <div>
           <Label>章节视频 *</Label>
-          <VideoUploader 
+          <VideoUploader
             videoUrl={section.videoUrl}
             index={index}
             onVideoUrlChange={(value) => onUpdate(index, "videoUrl", value)}
             onVideoFileChange={(file) => onVideoFileChange(index, file)}
             uploadStatus={uploadStatus}
             onAbortUpload={() => onAbortUpload(index)}
+            duration={section.duration}
           />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id={`section-preview-${index}`}
+            checked={section.isPreview || false}
+            onChange={(e) => onUpdate(index, "isPreview", e.target.checked)}
+            className="rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <Label htmlFor={`section-preview-${index}`} className="font-normal cursor-pointer">
+            设为预览章节（未购买课程的用户可观看）
+          </Label>
         </div>
       </div>
     </div>

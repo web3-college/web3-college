@@ -1,10 +1,10 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { 
-  Book, 
-  Users, 
-  BadgeDollarSign, 
+import {
+  Book,
+  Users,
+  BadgeDollarSign,
   FileText,
   Activity
 } from "lucide-react";
@@ -142,8 +142,8 @@ export default function AdminDashboardPage() {
           <div className="h-48 flex items-end space-x-2">
             {[35, 45, 30, 65, 40, 80, 60, 55, 70, 75, 50, 65].map((height, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
-                <div 
-                  className="w-full bg-blue-500/20 hover:bg-blue-500/40 transition-all rounded-t-sm" 
+                <div
+                  className="w-full bg-blue-500/20 hover:bg-blue-500/40 transition-all rounded-t-sm"
                   style={{ height: `${height}%` }}
                 ></div>
                 <div className="text-xs mt-2 text-foreground/60">{i + 1}月</div>

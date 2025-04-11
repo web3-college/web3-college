@@ -29,6 +29,7 @@ interface CourseBasicInfoProps {
   coverImage: string;
   setCoverImage: (coverImage: string) => void;
   setFormError: (error: string) => void;
+  isEditing?: boolean;
 }
 
 export function CourseBasicInfo({
@@ -42,7 +43,8 @@ export function CourseBasicInfo({
   setCategoryId,
   coverImage,
   setCoverImage,
-  setFormError
+  setFormError,
+  isEditing = false
 }: CourseBasicInfoProps) {
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,6 +79,62 @@ export function CourseBasicInfo({
     fetchCategories();
   }, [setFormError]);
 
+  const renderPriceInput = () => {
+    if (isEditing) {
+      return (
+        <div>
+          <Label htmlFor="price">价格 (YIDENG) *</Label>
+          <Input
+            id="price"
+            type="number"
+            value={price}
+            disabled
+            className="mt-1 bg-gray-100 cursor-not-allowed"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            已发布课程的价格不可修改，这确保了区块链上的价格与平台一致
+          </p>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <Label htmlFor="price">价格 (YIDENG) *</Label>
+          <Input
+            id="price"
+            type="number"
+            step="1"
+            min="1"
+            value={price}
+            onChange={(e) => {
+              const value = e.target.value;
+              const intValue = parseInt(value);
+              if (!isNaN(intValue) && intValue.toString() === value) {
+                setPrice(value);
+              } else if (value === "") {
+                setPrice("");
+              } else {
+                setPrice(Math.floor(parseFloat(value)).toString());
+              }
+            }}
+            onBlur={(e) => {
+              const value = e.target.value;
+              if (value !== "") {
+                setPrice(Math.floor(parseFloat(value)).toString());
+              }
+            }}
+            className="mt-1"
+            placeholder="100"
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            价格将以YIDENG代币支付，仅支持整数金额 (例如: 100 YD)
+          </p>
+        </div>
+      );
+    }
+  };
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">基本信息</h2>
@@ -93,42 +151,7 @@ export function CourseBasicInfo({
           />
         </div>
 
-        <div>
-          <Label htmlFor="price">价格 (YIDENG) *</Label>
-          <Input
-            id="price"
-            type="number"
-            step="1"
-            min="1"
-            value={price}
-            onChange={(e) => {
-              // 只接受整数输入
-              const value = e.target.value;
-              const intValue = parseInt(value);
-              if (!isNaN(intValue) && intValue.toString() === value) {
-                setPrice(value);
-              } else if (value === "") {
-                setPrice("");
-              } else {
-                // 如果输入的不是整数，转换为整数
-                setPrice(Math.floor(parseFloat(value)).toString());
-              }
-            }}
-            onBlur={(e) => {
-              // 失去焦点时确保值为整数
-              const value = e.target.value;
-              if (value !== "") {
-                setPrice(Math.floor(parseFloat(value)).toString());
-              }
-            }}
-            className="mt-1"
-            placeholder="100"
-            required
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            价格将以YIDENG代币支付，仅支持整数金额 (例如: 100 YD)
-          </p>
-        </div>
+        {renderPriceInput()}
 
         <div>
           <Label htmlFor="category">课程分类 *</Label>

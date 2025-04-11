@@ -19,5 +19,13 @@ export type CreateCourseSectionDto = {
    * 视频URL
    */
   videoUrl?: string;
+  /**
+   * 是否为预览章节
+   */
+  isPreview?: boolean;
+  /**
+   * 视频时长
+   */
+  duration?: number;
 };
 

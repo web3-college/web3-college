@@ -15,13 +15,18 @@ import {
   Shield,
   UserCog,
 } from "lucide-react";
-import { ConnectKitButton } from "connectkit";
+import { ConnectKitButton, useSIWE } from "connectkit";
+import { redirect } from "next/navigation";
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const { isSignedIn } = useSIWE()
+  if (!isSignedIn) {
+    redirect("/")
+  }
   return (
     <div className="flex h-screen bg-background text-foreground">
       {/* 侧边栏 */}

@@ -24,5 +24,13 @@ export const $UpdateCourseSectionDto = {
       type: 'string',
       description: `视频URL`,
     },
+    isPreview: {
+      type: 'boolean',
+      description: `是否为预览章节`,
+    },
+    duration: {
+      type: 'number',
+      description: `视频时长`,
+    },
   },
 } as const;
