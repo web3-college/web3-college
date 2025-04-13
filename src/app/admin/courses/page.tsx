@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { CourseService } from "@/api/services/CourseService";
-import { CourseList } from "@/components/courses/CourseList";
-import { DeleteCourseDialog } from "@/components/courses/DeleteCourseDialog";
+import { CourseList, DeleteCourseDialog } from "@/components/course";
 import { CourseResponseDto as Course } from "@/api/models/CourseResponseDto";
 import debounce from "lodash/debounce";
 

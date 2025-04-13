@@ -85,52 +85,40 @@ export function MarketClient({ courses, categories }: MarketClientProps) {
   };
 
   return (
-    <div className="min-h-screen py-20 px-4">
-      <div className="container mx-auto">
-        {/* 页面标题 */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold my-4 tracking-tight">
-            课程列表
-          </h1>
-          <p className="text-foreground/40 max-w-2xl mx-auto">
-            使用yideng代币解锁优质的区块链和Web3开发课程
-          </p>
-        </div>
+    <>
+      {/* 分类过滤器 */}
+      <div className="mb-10 flex flex-wrap gap-2 justify-center">
+        <Button
+          key="all"
+          variant={selectedCategoryId === null ? "default" : "outline"}
+          onClick={() => handleCategorySelect(null)}
+          className="rounded-full cursor-pointer"
+          disabled={isLoading}
+        >
+          全部
+        </Button>
 
-        {/* 分类过滤器 */}
-        <div className="mb-10 flex flex-wrap gap-2 justify-center">
+        {categories.map(category => (
           <Button
-            key="all"
-            variant={selectedCategoryId === null ? "default" : "outline"}
-            onClick={() => handleCategorySelect(null)}
+            key={category.id}
+            variant={selectedCategoryId === category.id ? "default" : "outline"}
+            onClick={() => handleCategorySelect(category.id)}
             className="rounded-full cursor-pointer"
             disabled={isLoading}
           >
-            全部
+            {category.name}
           </Button>
-
-          {categories.map(category => (
-            <Button
-              key={category.id}
-              variant={selectedCategoryId === category.id ? "default" : "outline"}
-              onClick={() => handleCategorySelect(category.id)}
-              className="rounded-full cursor-pointer"
-              disabled={isLoading}
-            >
-              {category.name}
-            </Button>
-          ))}
-        </div>
-
-        {/* 课程列表 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {isLoading ? (
-            <CourseSkeletons count={6} />
-          ) : (
-            <CourseList courses={displayedCourses} />
-          )}
-        </div>
+        ))}
       </div>
-    </div>
+
+      {/* 课程列表 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {isLoading ? (
+          <CourseSkeletons count={6} />
+        ) : (
+          <CourseList courses={displayedCourses} />
+        )}
+      </div>
+    </>
   );
 } 
