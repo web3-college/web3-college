@@ -8,6 +8,7 @@ import type { CreateCourseDto } from '../models/CreateCourseDto';
 import type { CreateCourseSectionDto } from '../models/CreateCourseSectionDto';
 import type { SavePurchaseRecordDto } from '../models/SavePurchaseRecordDto';
 import type { UpdateCourseDto } from '../models/UpdateCourseDto';
+import type { UpdateProgressDto } from '../models/UpdateProgressDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -80,6 +81,27 @@ export class CourseService {
         'name': name,
         'isActive': isActive,
         'categoryId': categoryId,
+      },
+    });
+  }
+  /**
+   * 更新课程学习进度
+   * @returns any 更新学习进度成功
+   * @throws ApiError
+   */
+  public static courseControllerUpdateProgress({
+    requestBody,
+  }: {
+    requestBody: UpdateProgressDto,
+  }): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'PUT',
+      url: '/api/course/progress',
+      body: requestBody,
+      mediaType: 'application/json',
+      errors: {
+        401: `用户未登录`,
+        404: `课程章节不存在`,
       },
     });
   }
