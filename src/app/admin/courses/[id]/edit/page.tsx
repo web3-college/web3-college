@@ -73,7 +73,7 @@ export default function EditCoursePage() {
 
           // 初始化章节数据
           if (courseData.sections && courseData.sections.length > 0) {
-            const formattedSections = courseData.sections.map(section => ({
+            const formattedSections = courseData.sections.map((section: any) => ({
               title: section.title,
               description: section.description || "",
               order: section.order,
