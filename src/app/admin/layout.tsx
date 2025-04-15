@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +16,8 @@ import {
   UserCog,
   Award,
 } from "lucide-react";
-import { ConnectKitButton, useSIWE } from "connectkit";
+import { ConnectKitButton } from "connectkit";
+import { AuthService } from "@/api";
 import { redirect } from "next/navigation";
 
 interface AdminLayoutProps {
@@ -24,10 +25,15 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const { isSignedIn } = useSIWE()
-  if (!isSignedIn) {
-    redirect("/")
+  const checkAdmin = async () => {
+    const isAdmin = await AuthService.authControllerIsAdmin()
+    if (!isAdmin.data?.hasAccess) {
+      redirect("/")
+    }
   }
+  useEffect(() => {
+    checkAdmin()
+  }, [])
   return (
     <div className="flex h-screen bg-background text-foreground">
       {/* 侧边栏 */}

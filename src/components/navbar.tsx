@@ -33,6 +33,7 @@ export function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10)
     }
+    checkAdmin()
     window.addEventListener("scroll", handleScroll)
     window.addEventListener("checkAdmin", checkAdmin)
     return () => {
