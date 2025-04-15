@@ -35,7 +35,7 @@ interface CourseDetailClientProps {
 }
 
 export function CourseDetailClient({ course, sections }: CourseDetailClientProps) {
-  const { purchaseCourse, approve, getAllowance, hasCourse, getAllCourses, status, isLoading, error } = useCourseMarket();
+  const { purchaseCourse, approve, getAllowance, hasCourse } = useCourseMarket();
   const { isConnected } = useAccount();
   const [isPurchased, setIsPurchased] = useState(false);
   const [isCheckingPurchase, setIsCheckingPurchase] = useState(true);

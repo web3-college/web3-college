@@ -38,7 +38,7 @@ export function SectionDetailClient({
   const [isPurchased, setIsPurchased] = useState(false);
   const [sections, setSections] = useState<CourseSection[]>([]);
   const [currentSection, setCurrentSection] = useState<CourseSection>({} as CourseSection);
-  const { hasCourse, status, isLoading, error } = useCourseMarket();
+  const { hasCourse } = useCourseMarket();
   const [isPending, startTransition] = useTransition();
   const { isSignedIn } = useSIWE();
   const [isLoadingSections, setIsLoadingSections] = useState(true);

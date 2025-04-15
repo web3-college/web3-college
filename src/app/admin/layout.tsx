@@ -14,6 +14,7 @@ import {
   LogOut,
   Shield,
   UserCog,
+  Award,
 } from "lucide-react";
 import { ConnectKitButton, useSIWE } from "connectkit";
 import { redirect } from "next/navigation";
@@ -79,7 +80,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
             <Link href="/admin/certificates">
               <Button variant="ghost" className="w-full justify-start">
-                <FileText className="h-4 w-4 mr-3" />
+                <Award className="h-4 w-4 mr-3" />
                 证书管理
               </Button>
             </Link>

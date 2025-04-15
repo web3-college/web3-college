@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Menu, X, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -54,9 +55,7 @@ export function Navbar() {
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
+          <Image src={"/logo/logo-transparent-jpeg.jpeg"} width={32} height={32} alt="logo" />
           <span className="font-bold text-xl tracking-tight">web3大学</span>
         </Link>
 
