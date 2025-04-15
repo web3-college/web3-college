@@ -68,10 +68,13 @@ export function PermissionFormDialog({
             <Input
               id="name"
               name="name"
-              placeholder="例如：用户管理"
+              placeholder="例如：user:read"
               value={formData.name}
               onChange={handleInputChange}
             />
+            <p className="text-sm text-muted-foreground">
+              推荐格式: 资源:操作, 如: user:create, course:update
+            </p>
           </div>
           <div className="space-y-2">
             <label htmlFor="action" className="text-sm font-medium">
@@ -80,13 +83,10 @@ export function PermissionFormDialog({
             <Input
               id="action"
               name="action"
-              placeholder="例如：user:read"
+              placeholder="例如：read"
               value={formData.action}
               onChange={handleInputChange}
             />
-            <p className="text-sm text-muted-foreground">
-              推荐格式: 资源:操作, 如: user:create, course:update
-            </p>
           </div>
           <div className="space-y-2">
             <label htmlFor="description" className="text-sm font-medium">

@@ -8,6 +8,7 @@ import { useSIWE } from "connectkit";
 import { useAccount } from "wagmi";
 import { useYiDengToken } from "@/lib/contract-hooks";
 import { useCourseMarket } from "@/lib/contract-hooks";
+import { useCourseCertificate } from "@/lib/contract-hooks";
 import {
   BookOpen,
   Award,
@@ -34,6 +35,7 @@ export default function CoursesClient() {
 
   const { getBalance } = useYiDengToken();
   const { getUserCourses } = useCourseMarket();
+  const { getMyCertificates, getCertificateDetails } = useCourseCertificate();
 
   // 如果用户未登录，重定向到首页
   useEffect(() => {
@@ -95,32 +97,71 @@ export default function CoursesClient() {
     try {
       setIsLoadingCertificates(true);
 
-      // 这里应该调用证书相关的合约方法获取用户的证书
-      // 暂时使用模拟数据
-      const mockCertificates = [
-        {
-          id: 1,
-          courseId: 1,
-          courseName: "区块链基础与应用",
-          issueDate: new Date().toISOString(),
-          tokenId: "1",
-          imageUrl: "https://via.placeholder.com/300x200?text=Certificate",
-        },
-        {
-          id: 2,
-          courseId: 2,
-          courseName: "智能合约开发进阶",
-          issueDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          tokenId: "2",
-          imageUrl: "https://via.placeholder.com/300x200?text=Certificate",
-        }
-      ];
+      // 获取所有课程ID
+      const onchainCourses = await getUserCourses();
+      const courseIds = onchainCourses.map(course => course.web2CourseId);
 
-      setCertificates(mockCertificates);
+      if (courseIds.length === 0) {
+        setCertificates([]);
+        return;
+      }
+
+      // 存储所有证书
+      const allCertificates = [];
+
+      // 遍历每个课程ID，获取对应的证书
+      for (const courseId of courseIds) {
+        try {
+          // 从智能合约获取该课程的证书
+          const courseCertificateIds = await getMyCertificates(courseId);
+
+          if (courseCertificateIds.length > 0) {
+            // 获取课程详情以获取课程名称
+            const courseResponse = await CourseService.courseControllerFindCourseById({
+              id: parseInt(courseId)
+            });
+
+            const courseName = courseResponse.data?.name || `课程 #${courseId}`;
+
+            // 将每个证书转换为前端所需格式
+            for (const tokenId of courseCertificateIds) {
+              // 获取证书详细信息
+              const certificateDetails = await getCertificateDetails(tokenId);
+
+              if (certificateDetails) {
+                // 将时间戳转换为日期
+                const issueDate = new Date(Number(certificateDetails.timestamp) * 1000).toISOString();
+
+                // 生成证书图片URL - 使用更好的动态图片服务
+                // 这里使用UI Avatars服务生成基于课程名的动态图片
+                // 实际项目中应该从metadataURI获取真实的证书图片
+                const encodedCourseName = encodeURIComponent(courseName);
+                const colorHash = Math.abs(courseName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 1000;
+                const bgColor = `${colorHash}6${(colorHash % 9)}c`; // 生成动态颜色
+                const fgColor = 'ffffff'; // 白色文字
+
+                allCertificates.push({
+                  id: allCertificates.length + 1, // 前端显示用
+                  courseId: parseInt(courseId),
+                  courseName: courseName,
+                  tokenId: tokenId.toString(),
+                  issueDate: issueDate,
+                  metadataURI: certificateDetails.metadataURI,
+                  imageUrl: `https://ui-avatars.com/api/?name=${encodedCourseName}&background=${bgColor}&color=${fgColor}&size=512&bold=true&format=png`
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`获取课程 ${courseId} 的证书失败:`, error);
+        }
+      }
+
+      setCertificates(allCertificates);
     } catch (error) {
       console.error("获取证书失败:", error);
       toast.error("获取证书失败", {
-        description: "无法加载您的证书，请稍后重试"
+        description: "无法从区块链获取您的证书，请稍后重试"
       });
     } finally {
       setIsLoadingCertificates(false);
