@@ -56,7 +56,7 @@ export function Navbar() {
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Image src={"/logo/logo-transparent-jpeg.jpeg"} width={32} height={32} alt="logo" />
+          <img src={"/logo/logo-transparent-jpeg.jpeg"} alt="logo" className="w-8 h-8" />
           <span className="font-bold text-xl tracking-tight">web3大学</span>
         </Link>
 

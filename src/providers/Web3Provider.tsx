@@ -6,18 +6,28 @@ import { ConnectKitProvider, getDefaultConfig, SIWEProvider, SIWEConfig } from "
 import { AuthService } from "@/api";
 import { SiweMessage } from "siwe";
 
+let nonce = {
+  value: '',
+  expiresAt: 0,
+};
+
 const siweConfig: SIWEConfig = {
   getNonce: async () => {
-    console.log('getNonce');
-
+    if (nonce.expiresAt > Date.now()) {
+      return nonce.value;
+    }
     const response = await AuthService.authControllerGetNonce();
-    console.log(response.data);
-
-    return response.data?.nonce || '';
+    console.log('getNonce', response.data);
+    nonce = {
+      value: response.data?.nonce || '',
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    };
+    return nonce.value;
   },
-  createMessage: ({ nonce, address, chainId }) => {
-    console.log('createMessage');
-
+  createMessage: async ({ nonce, address, chainId }) => {
+    // const response = await AuthService.authControllerGetNonce();
+    // console.log('createMessage nonce', response.data);
+    console.log('createMessage nonce', nonce);
     const message = new SiweMessage({
       version: '1',
       domain: window.location.host,
@@ -35,7 +45,6 @@ const siweConfig: SIWEConfig = {
   },
   verifyMessage: async ({ message, signature }) => {
     console.log('verifyMessage');
-
     const response = await AuthService.authControllerVerifySignature({
       requestBody: {
         message,
@@ -65,6 +74,7 @@ const siweConfig: SIWEConfig = {
     window.dispatchEvent(new CustomEvent("checkAdmin"))
     return response.data?.success as boolean;
   },
+  nonceRefetchInterval: 10 * 60 * 1000,
 }
 
 const config = createConfig(
