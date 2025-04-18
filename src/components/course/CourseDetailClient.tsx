@@ -277,10 +277,6 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
         <h1 className="text-3xl md:text-4xl font-bold mb-4 transition-colors duration-300 hover:text-primary/90">
           {course.name}
         </h1>
-
-        <p className="text-xl text-foreground/60 mb-6">
-          {course.description}
-        </p>
       </div>
 
       {/* 价格和购买按钮 */}

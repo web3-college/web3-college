@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition, useRef, useCallback } from "react";
+import { useEffect, useState, useTransition, useRef, useCallback, useMemo } from "react";
 import { notFound, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
@@ -50,24 +50,9 @@ export function SectionDetailClient({
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
   const isUpdatingProgress = useRef(false);
 
-  const checkPurchased = async () => {
-    const isPurchased = await hasCourse(courseId.toString());
-    setIsPurchased(isPurchased);
-    // 检查权限 - 如果未购买且不是预览章节，显示购买提示
-    if (!isPurchased && !currentSection.isPreview) {
-      toast("需要购买课程", {
-        description: "该章节需要购买后才能观看",
-        action: {
-          label: "购买课程",
-          onClick: () => navigateToCoursePage()
-        }
-      });
-    } else if (!isSignedIn) {
-      toast("需要登录", {
-        description: "请先登录才能观看课程",
-      });
-    }
-  }
+  const hasPermission = useMemo(() => {
+    return isPurchased || currentSection.isPreview;
+  }, [isPurchased, currentSection.isPreview]);
 
   const fetchSections = async () => {
     setIsLoadingSections(true);
@@ -93,8 +78,26 @@ export function SectionDetailClient({
       if (!currentSection) {
         notFound();
       }
-      setCurrentSection(currentSection);
+      console.log('currentSection', currentSection);
 
+      setCurrentSection(currentSection);
+      const hasAccess = currentSection.isPreview || await hasCourse(courseId.toString());
+      setIsPurchased(!currentSection.isPreview && hasAccess);
+
+      // 如果没有访问权限，才显示提示
+      if (!hasAccess) {
+        toast("需要购买课程", {
+          description: "该章节需要购买后才能观看",
+          action: {
+            label: "购买课程",
+            onClick: () => navigateToCoursePage()
+          }
+        });
+      } else if (!isSignedIn) {
+        toast("需要登录", {
+          description: "请先登录才能观看课程",
+        });
+      }
       // 如果有之前的观看位置，设置初始时间
       if (currentSection.lastPosition && currentSection.lastPosition > 0) {
         setCurrentTime(currentSection.lastPosition);
@@ -115,12 +118,11 @@ export function SectionDetailClient({
   }
 
   useEffect(() => {
-    checkPurchased();
     fetchSections();
 
     // 监听页面离开事件
     const handleBeforeUnload = () => {
-      if (isPurchased && isSignedIn) {
+      if (hasPermission && isSignedIn) {
         updateProgress(true);
       }
     };
@@ -129,7 +131,7 @@ export function SectionDetailClient({
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     // 每30秒更新一次进度
-    if (isPurchased && isSignedIn) {
+    if (hasPermission && isSignedIn) {
       progressInterval.current = setInterval(() => {
         updateProgress();
       }, 30000); // 30秒保存一次进度
@@ -143,11 +145,11 @@ export function SectionDetailClient({
       window.removeEventListener('beforeunload', handleBeforeUnload);
 
       // 组件卸载时也保存进度
-      if (isPurchased && isSignedIn) {
+      if (hasPermission && isSignedIn) {
         updateProgress(true);
       }
     };
-  }, [courseId, sectionId, isPurchased, isSignedIn]);
+  }, [courseId, sectionId, isSignedIn]);
 
   // 更新进度的函数
   const updateProgress = useCallback(async (isExiting = false) => {
@@ -156,7 +158,7 @@ export function SectionDetailClient({
 
     try {
       // 如果进度小于1%或者没有播放，不更新
-      if (!currentSection.id || !isPurchased || !isSignedIn || progress < 1) {
+      if (!currentSection.id || !hasPermission || !isSignedIn || progress < 1) {
         return;
       }
 
@@ -195,7 +197,7 @@ export function SectionDetailClient({
     } finally {
       isUpdatingProgress.current = false;
     }
-  }, [courseId, sectionId, currentSection.id, isPurchased, isSignedIn, progress, currentTime]);
+  }, [courseId, sectionId, currentSection.id, hasPermission, isSignedIn, progress, currentTime]);
 
   // 视频播放时间更新处理
   const handleTimeUpdate = useCallback((currentTime: number, duration: number) => {
