@@ -32,6 +32,7 @@ export const s3UploadSmall = async (file: File) => {
   const md5 = await calculateMd5(file);
   console.log('md5', md5);
   const isExists = await checkFileExists(md5);
+  console.log('isExists', isExists);
   if (isExists) {
     return {
       fileName: file.name,
@@ -39,10 +40,11 @@ export const s3UploadSmall = async (file: File) => {
       url: `https://${bucketName}.s3.${region}.amazonaws.com/${md5}`
     };
   }
+  const arrayBuffer = await file.arrayBuffer();
   const command = new PutObjectCommand({
     Bucket: bucketName,
-    Key: file.name,
-    Body: file,
+    Key: md5,
+    Body: new Uint8Array(arrayBuffer),
     ContentType: file.type,
   });
 
@@ -96,8 +98,16 @@ export const s3UploadMultipart = async (chunk: Blob, partNumber: number, key: st
         file: chunk,
       },
     });
-    console.log('分片上传成功', result);
-
+    // const arrayBuffer = await chunk.arrayBuffer();
+    // const command = new UploadPartCommand({
+    //   Bucket: bucketName,
+    //   Key: key,
+    //   UploadId: uploadId,
+    //   PartNumber: partNumber,
+    //   Body: arrayBuffer,
+    // });
+    // const result = await s3Client.send(command);
+    // console.log('result', result);
     return {
       ETag: result.data.ETag || "",
       PartNumber: partNumber,

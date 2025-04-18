@@ -1,4 +1,4 @@
-export async function sliceFile(targetFile: File, chunkSize: number = 8) {
+export async function sliceFile(targetFile: File, chunkSize: number = 5) {
     const chunkSizeBytes = chunkSize * 1024 * 1024;
     const chunks = [];
     let start = 0;
