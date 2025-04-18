@@ -36,7 +36,7 @@ export const s3UploadSmall = async (file: File) => {
     return {
       fileName: file.name,
       key: md5,
-      url: `https://${bucketName}.s3.${region}.amazonaws.com/${md5}`
+      url: `${process.env.NEXT_PUBLIC_CDN_URL}/${md5}`
     };
   }
   const arrayBuffer = await file.arrayBuffer();
@@ -52,7 +52,7 @@ export const s3UploadSmall = async (file: File) => {
   return {
     fileName: file.name,
     key: md5,
-    url: `https://${bucketName}.s3.${region}.amazonaws.com/${md5}`
+    url: `${process.env.NEXT_PUBLIC_CDN_URL}/${md5}`
   };
 };
 
@@ -65,7 +65,7 @@ export const s3InitMultipartUpload = async (file: File) => {
     return {
       key: md5,
       uploadId: "",
-      directUrl: `https://${bucketName}.s3.${region}.amazonaws.com/${md5}`
+      directUrl: `${process.env.NEXT_PUBLIC_CDN_URL}/${md5}`
     };
   }
   const expirationDate = new Date();
@@ -123,6 +123,6 @@ export const s3CompleteMultipartUpload = async (key: string, uploadId: string, p
   });
   await s3Client.send(command);
   return {
-    url: `https://${bucketName}.s3.${region}.amazonaws.com/${key}`,
+    url: `${process.env.NEXT_PUBLIC_CDN_URL}/${key}`,
   };
 }
