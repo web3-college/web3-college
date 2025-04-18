@@ -1,6 +1,5 @@
 import { CompleteMultipartUploadCommand, CreateMultipartUploadCommand, HeadObjectCommand, PutObjectCommand, S3Client, UploadPartCommand } from "@aws-sdk/client-s3";
 import { calculateMd5 } from "./md5-calculator";
-import { UploadService } from "@/api";
 
 const region = process.env.NEXT_PUBLIC_AWS_S3_REGION || '';
 const accessKeyId = process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY_ID || '';
@@ -90,26 +89,17 @@ export const s3InitMultipartUpload = async (file: File) => {
 
 export const s3UploadMultipart = async (chunk: Blob, partNumber: number, key: string, uploadId: string) => {
   try {
-    const result = await UploadService.uploadControllerUploadVideoPart({
-      formData: {
-        key,
-        partNumber,
-        uploadId,
-        file: chunk,
-      },
+    const arrayBuffer = await chunk.arrayBuffer();
+    const command = new UploadPartCommand({
+      Bucket: bucketName,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: partNumber,
+      Body: new Uint8Array(arrayBuffer),
     });
-    // const arrayBuffer = await chunk.arrayBuffer();
-    // const command = new UploadPartCommand({
-    //   Bucket: bucketName,
-    //   Key: key,
-    //   UploadId: uploadId,
-    //   PartNumber: partNumber,
-    //   Body: arrayBuffer,
-    // });
-    // const result = await s3Client.send(command);
-    // console.log('result', result);
+    const result = await s3Client.send(command);
     return {
-      ETag: result.data.ETag || "",
+      ETag: result.ETag || "",
       PartNumber: partNumber,
     };
   } catch (error) {
