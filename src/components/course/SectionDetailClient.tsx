@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition, useRef, useCallback, useMemo } from "react";
 import { notFound } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter, redirect } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,7 +11,7 @@ import { useCourseMarket } from "@/lib/contract-hooks";
 import { CourseService } from "@/api/services/CourseService";
 import { useSIWE } from "connectkit";
 import { SectionStatus } from "@/types";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 interface CourseSection {
   id: number;
@@ -37,6 +37,7 @@ export function SectionDetailClient({
   sectionId
 }: SectionDetailClientProps) {
   const tCourseSections = useTranslations('CourseSections');
+  const locale = useLocale();
   const router = useRouter();
   const [isPurchased, setIsPurchased] = useState(false);
   const [sections, setSections] = useState<CourseSection[]>([]);
@@ -99,6 +100,10 @@ export function SectionDetailClient({
       } else if (!isSignedIn) {
         toast(tCourseSections("needLogin"), {
           description: tCourseSections("needLoginDesc"),
+        });
+        redirect({
+          href: `/course/${courseId}`,
+          locale: locale
         });
       }
       // 如果有之前的观看位置，设置初始时间
@@ -352,8 +357,8 @@ export function SectionDetailClient({
                 <div className="flex justify-between items-center text-sm text-foreground/60">
                   <span>{tCourseSections("watchProgress")}: {Math.round(progress)}%</span>
                   <span>
-                    {new Date(currentTime * 1000).toISOString().substring(14, 5)} /
-                    {duration ? new Date(duration * 1000).toISOString().substring(14, 5) : "00:00"}
+                    {new Date(currentTime * 1000).toISOString().substring(14, 19)} /
+                    {duration ? new Date(duration * 1000).toISOString().substring(14, 19) : "00:00"}
                   </span>
                 </div>
               </div>

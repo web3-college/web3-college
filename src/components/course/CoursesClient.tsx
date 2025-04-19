@@ -51,7 +51,7 @@ export default function CoursesClient() {
   }, [isSignedIn]);
 
   // 获取用户购买的课程
-  const fetchPurchasedCourses = async () => {
+  const fetchPurchasedCourses = async (): Promise<void> => {
     try {
       setIsLoadingCourses(true);
 
