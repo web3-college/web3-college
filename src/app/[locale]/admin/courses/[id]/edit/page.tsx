@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Save, Loader2, ChevronLeft } from "lucide-react";
@@ -15,15 +15,13 @@ import { uploadVideoFile, pauseUpload, cleanupUploadControl } from "@/lib/video-
 import { cleanupExpiredStates } from "@/lib/upload-storage";
 import { CourseService } from "@/api";
 import { getVideoDuration } from "@/lib/file";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
 
 export default function EditCoursePage() {
-  const router = useRouter();
   const { id } = useParams();
   const courseId = Array.isArray(id) ? id[0] : id;
-  const { address, isConnected } = useAccount(); // 获取当前钱包地址
 
   // 课程价格在编辑时不可修改，因为它已经在区块链上发布
   // 修改价格需要进行额外的链上操作，会导致链上数据与后端数据不一致

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useCourseMarket } from "@/lib/contract-hooks";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

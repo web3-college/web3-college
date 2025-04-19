@@ -2,20 +2,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Zap, ArrowRight } from "lucide-react";
 import { CourseResponseDto as Course } from "@/api/models/CourseResponseDto";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 interface CourseListProps {
   courses: Course[];
 }
 
 export function CourseList({ courses }: CourseListProps) {
+  const t = useTranslations('Market');
   // 处理空数据情况
   if (!courses || courses.length === 0) {
     return (
       <div className="col-span-full text-center py-20">
         <h3 className="text-xl font-semibold mb-2">暂无课程</h3>
         <p className="text-foreground/40">
-          当前分类下暂无课程，请尝试其他分类
+          {t("noCoursesDesc")}
         </p>
       </div>
     );
@@ -57,7 +59,7 @@ export function CourseList({ courses }: CourseListProps) {
                     size="sm"
                     className="rounded-full transition-all duration-300 hover:bg-primary-600 active:scale-95"
                   >
-                    查看详情 <ArrowRight className="ml-1 h-4 w-4 transition-transform duration-300 hover:translate-x-1" />
+                    {t("detail")} <ArrowRight className="ml-1 h-4 w-4 transition-transform duration-300 hover:translate-x-1" />
                   </Button>
                 </div>
               </div>

@@ -6,11 +6,12 @@ import { CertificateService, CourseService } from "@/api";
 import { toast } from "sonner";
 import { PlayCircle, Lock, CheckCircle, Award, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { formatDuration } from "@/lib/file";
 import { useSIWE } from "connectkit";
 import { Progress } from "@/components/ui/progress";
 import { SectionStatus, CertificateStatus } from "@/types";
+import { useTranslations } from "next-intl";
 
 interface CourseSection {
   id: number;
@@ -30,6 +31,7 @@ interface CourseSectionsProps {
 }
 
 export function CourseSections({ courseId, isPurchased = false }: CourseSectionsProps) {
+  const tCourseSections = useTranslations('CourseSections');
   const router = useRouter();
   const [sections, setSections] = useState<CourseSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,8 +67,8 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
       }
     } catch (error) {
       console.error("获取课程章节出错:", error);
-      toast.error("获取章节失败", {
-        description: "加载章节数据时出现错误，请稍后重试"
+      toast.error(tCourseSections("getSectionsError"), {
+        description: tCourseSections("getSectionsErrorDesc")
       });
     } finally {
       setIsLoading(false);
@@ -118,24 +120,24 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
         }
       });
 
-      toast.success("申请成功", {
-        description: "您的证书申请已提交，请等待审核",
+      toast.success(tCourseSections("requestCertificateSuccess"), {
+        description: tCourseSections("requestCertificateSuccessDesc"),
       });
     } catch (error: any) {
       console.error("证书申请失败:", error);
 
       // 错误处理
       if (error?.status === 400) {
-        toast.error("申请失败", {
-          description: "未满足条件或已申请过证书",
+        toast.error(tCourseSections("requestCertificateError"), {
+          description: tCourseSections("requestCertificateErrorDesc"),
         });
       } else if (error?.status === 401) {
-        toast.error("申请失败", {
-          description: "请先登录后再申请证书",
+        toast.error(tCourseSections("requestCertificateLoginError"), {
+          description: tCourseSections("requestCertificateLoginError"),
         });
       } else {
-        toast.error("申请失败", {
-          description: "证书申请提交失败，请稍后重试",
+        toast.error(tCourseSections("requestCertificateError"), {
+          description: tCourseSections("requestCertificateErrorDesc"),
         });
       }
     } finally {
@@ -170,8 +172,8 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
 
   useEffect(() => {
     if (!isSignedIn) {
-      toast("需要登录", {
-        description: "请先登录才能观看课程",
+      toast(tCourseSections("needLogin"), {
+        description: tCourseSections("needLoginDesc"),
       });
     }
     fetchSections();
@@ -185,12 +187,8 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
   // 播放章节视频
   const playSection = (section: CourseSection) => {
     if (!isPurchased && !section.isPreview) {
-      toast("需要购买课程", {
-        description: "购买课程后即可观看所有章节",
-        action: {
-          label: "购买课程",
-          onClick: () => console.log("准备购买课程")
-        }
+      toast(tCourseSections("needPurchase"), {
+        description: tCourseSections("needPurchaseDesc"),
       });
       return;
     }
@@ -207,7 +205,7 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
         return (
           <div className="mt-2 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-lg p-2 text-center text-sm">
             <span className="inline-flex items-center">
-              证书申请审核中，请耐心等待
+              {tCourseSections("certificatePending")}
             </span>
           </div>
         );
@@ -217,7 +215,7 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
           <div className="mt-2 bg-green-500/10 text-green-500 border border-green-500/20 rounded-lg p-2 text-center text-sm">
             <span className="inline-flex items-center">
               <CheckCircle className="h-4 w-4 mr-2" />
-              证书已{certificateStatus === CertificateStatus.APPROVED ? '批准' : '颁发'}，可在个人中心查看
+              {certificateStatus === CertificateStatus.APPROVED ? tCourseSections("certificateApproved") : tCourseSections("certificateIssued")}
             </span>
           </div>
         );
@@ -226,7 +224,7 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
           <div className="mt-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg p-2 text-center text-sm">
             <span className="inline-flex items-center">
               <X className="h-4 w-4 mr-2" />
-              证书申请被拒绝，如有疑问请联系管理员
+              {tCourseSections("certificateRejected")}
             </span>
           </div>
         );
@@ -248,7 +246,7 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
   if (sections.length === 0) {
     return (
       <div className="text-center py-10 border border-dashed border-foreground/10 rounded-lg">
-        <p className="text-foreground/40">该课程暂无章节内容</p>
+        <p className="text-foreground/40">{tCourseSections("noSections")}</p>
       </div>
     );
   }
@@ -259,17 +257,17 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
       {isPurchased && (
         <div className="bg-foreground/[0.02] border border-white/[0.05] rounded-lg p-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">学习进度</span>
+            <span className="text-sm font-medium">{tCourseSections("learningProgress")}</span>
             <span className="text-sm text-foreground/60">{overallProgress}%</span>
           </div>
           <Progress value={overallProgress} className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-emerald-400 [&>div]:to-green-500" />
 
           <div className="mt-2 flex justify-between text-xs text-foreground/40">
-            <span>已完成章节: {sections.filter(s => s.status === SectionStatus.COMPLETED).length}/{sections.length}</span>
+            <span>{tCourseSections("completedSections")}: {sections.filter(s => s.status === SectionStatus.COMPLETED).length}/{sections.length}</span>
             {isCourseCompleted ? (
-              <span className="text-green-500">恭喜！课程已完成</span>
+              <span className="text-green-500">{tCourseSections("courseCompleted")}</span>
             ) : (
-              <span>继续加油！</span>
+              <span>{tCourseSections("continue")}</span>
             )}
           </div>
 
@@ -277,7 +275,7 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
           {isCheckingCertificate ? (
             <div className="mt-2 flex justify-center items-center text-xs text-foreground/60">
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              正在检查证书状态...
+              {tCourseSections("checkingCertificate")}
             </div>
           ) : (
             renderCertificateStatus()
@@ -292,7 +290,7 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
                 className="bg-gradient-to-br from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 font-medium px-6 py-2 rounded-full cursor-pointer"
               >
                 <Award className="mr-2 h-5 w-5 animate-pulse" />
-                {isRequestingCertificate ? "申请中..." : "申请课程证书"}
+                {isRequestingCertificate ? tCourseSections("requesting") : tCourseSections("requestCertificate")}
               </Button>
             </div>
           )}
@@ -338,22 +336,22 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
                   <div className="mr-4">
                     {section.status === SectionStatus.COMPLETED ? (
                       <span className="text-xs bg-green-500/10 text-green-500 border border-green-500/20 rounded-full px-2 py-0.5">
-                        已完成
+                        {tCourseSections("completed")}
                       </span>
                     ) : section.status === SectionStatus.STARTED && section.progress ? (
                       <span className="text-xs bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-full px-2 py-0.5">
-                        进行中 {section.progress}%
+                        {tCourseSections("inProgress")} {section.progress}%
                       </span>
                     ) : (
                       <span className="text-xs bg-foreground/10 text-foreground/60 border border-foreground/20 rounded-full px-2 py-0.5">
-                        未开始
+                        {tCourseSections("notStarted")}
                       </span>
                     )}
                   </div>
                 )}
                 {(section.isPreview && !isPurchased) && (
                   <span className="text-xs bg-green-500/10 text-green-500 border border-green-500/20 rounded-full px-2 py-0.5 mr-4">
-                    免费预览
+                    {tCourseSections("freePreview")}
                   </span>
                 )}
               </div>
@@ -361,13 +359,13 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
             <AccordionContent className="bg-foreground/[0.02] border-t border-white/[0.05]">
               <div className="p-4">
                 <p className="text-sm text-foreground/70 mb-4">
-                  {section.description || "暂无章节描述"}
+                  {section.description || tCourseSections("noDescription")}
                 </p>
                 {/* 章节进度条（仅购买后显示且有进度时显示） */}
                 {isPurchased && section.status === SectionStatus.STARTED && section.progress !== undefined && (
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs text-foreground/60">已学习</span>
+                      <span className="text-xs text-foreground/60">{tCourseSections("hasWatched")}</span>
                       <span className="text-xs text-foreground/60">{section.progress}%</span>
                     </div>
                     <Progress value={section.progress} className="h-1.5 [&>div]:bg-gradient-to-r [&>div]:from-emerald-400 [&>div]:to-green-500" />
@@ -381,11 +379,11 @@ export function CourseSections({ courseId, isPurchased = false }: CourseSections
                 >
                   <PlayCircle className="h-4 w-4 mr-2" />
                   {isPurchased ? (
-                    section.status === SectionStatus.COMPLETED ? "再次观看" : (
-                      section.progress && section.progress > 0 ? "继续观看" : "开始学习"
+                    section.status === SectionStatus.COMPLETED ? tCourseSections("watchAgain") : (
+                      section.progress && section.progress > 0 ? tCourseSections("continueWatching") : tCourseSections("startLearning")
                     )
                   ) : (
-                    section.isPreview ? "观看预览" : "购买后观看"
+                    section.isPreview ? tCourseSections("watchPreview") : tCourseSections("purchaseWatch")
                   )}
                 </Button>
               </div>

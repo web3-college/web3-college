@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Award, ExternalLink, Code } from "lucide-react";
@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog";
+import { useTranslations } from "next-intl";
 
 interface Certificate {
   id: number;
@@ -29,6 +30,7 @@ interface CertificatesListProps {
   certificates: Certificate[];
   isLoading: boolean;
 }
+
 
 // 证书骨架屏组件
 function CertificatesSkeletons() {
@@ -53,13 +55,14 @@ function CertificatesSkeletons() {
 
 // 空证书列表状态
 function EmptyCertificatesList() {
+  const tCertificates = useTranslations("Certificates");
   return (
     <div className="text-center py-10 border border-dashed border-foreground/10 rounded-lg">
       <Award className="h-10 w-10 mx-auto mb-4 text-foreground/30" />
-      <h3 className="text-lg font-medium mb-2">暂无证书</h3>
-      <p className="text-foreground/40 mb-6">完成课程并通过考核即可获得区块链证书</p>
+      <h3 className="text-lg font-medium mb-2">{tCertificates("noCertificates")}</h3>
+      <p className="text-foreground/40 mb-6">{tCertificates("noCertificatesDesc")}</p>
       <Button asChild>
-        <Link href="/market">浏览课程</Link>
+        <Link href="/market">{tCertificates("browseCourses")}</Link>
       </Button>
     </div>
   );
@@ -67,6 +70,7 @@ function EmptyCertificatesList() {
 
 // 证书列表内容
 function CertificatesContent({ certificates }: { certificates: Certificate[] }) {
+  const tCertificates = useTranslations("Certificates");
   const [selectedMetadata, setSelectedMetadata] = useState<string | null>(null);
   const [metadataContent, setMetadataContent] = useState<any | null>(null);
   const [isMetadataLoading, setIsMetadataLoading] = useState(false);
@@ -95,9 +99,9 @@ function CertificatesContent({ certificates }: { certificates: Certificate[] }) 
         description: "本证书证明持有者已成功完成相关课程的学习",
         image: "https://via.placeholder.com/300x200?text=Certificate",
         attributes: [
-          { trait_type: "课程编号", value: "WEB3-101" },
-          { trait_type: "完成日期", value: new Date().toISOString().split('T')[0] },
-          { trait_type: "技能", value: "区块链开发" }
+          { trait_type: tCertificates("courseNumber"), value: "WEB3-101" },
+          { trait_type: tCertificates("completionDate"), value: new Date().toISOString().split('T')[0] },
+          { trait_type: tCertificates("skill"), value: "区块链开发" }
         ]
       };
 
@@ -145,10 +149,10 @@ function CertificatesContent({ certificates }: { certificates: Certificate[] }) 
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-lg font-semibold">{cert.courseName}</h3>
-                <div className="bg-green-500/10 text-green-500 text-xs py-1 px-2 rounded-full border border-green-500/20">已认证</div>
+                <div className="bg-green-500/10 text-green-500 text-xs py-1 px-2 rounded-full border border-green-500/20">{tCertificates("issued")}</div>
               </div>
               <p className="text-foreground/40 text-sm mb-4 flex items-center">
-                <span className="mr-1">发行日期:</span>
+                <span className="mr-1">{tCertificates("issuedDate")}:</span>
                 <span className="font-medium text-foreground/60">
                   {new Date(cert.issueDate).toLocaleDateString('zh-CN')}
                 </span>
@@ -159,10 +163,10 @@ function CertificatesContent({ certificates }: { certificates: Certificate[] }) 
                     size="sm"
                     variant="outline"
                     onClick={() => handleViewMetadata(cert.metadataURI)}
-                    className="w-[80px] border-purple-500/20 hover:bg-purple-500/10"
+                    className="w-[100px] border-purple-500/20 hover:bg-purple-500/10"
                   >
                     <Code className="h-4 w-4 mr-1" />
-                    元数据
+                    {tCertificates("metadata")}
                   </Button>
                 )}
               </div>
@@ -177,10 +181,10 @@ function CertificatesContent({ certificates }: { certificates: Certificate[] }) 
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <Code className="h-5 w-5 mr-2 text-purple-500" />
-              区块链证书元数据
+              {tCertificates("certificateMetadata")}
             </DialogTitle>
             <DialogDescription>
-              NFT证书元数据遵循ERC-721元数据标准，包含证书的属性、图片和描述信息
+              {tCertificates("metadataDesc")}
             </DialogDescription>
           </DialogHeader>
 
@@ -192,7 +196,7 @@ function CertificatesContent({ certificates }: { certificates: Certificate[] }) 
             <div className="space-y-4">
               {/* 元数据源URI */}
               <div className="p-3 rounded-md bg-foreground/5 border border-white/5 text-xs font-mono break-all">
-                <div className="text-xs text-purple-400 mb-1">URI来源</div>
+                <div className="text-xs text-purple-400 mb-1">{tCertificates("uriSource")}</div>
                 {selectedMetadata}
                 {selectedMetadata?.startsWith('ipfs://') && (
                   <a
@@ -202,14 +206,14 @@ function CertificatesContent({ certificates }: { certificates: Certificate[] }) 
                     className="text-blue-500 flex items-center gap-1 mt-2 hover:underline"
                   >
                     <ExternalLink className="h-3 w-3" />
-                    在IPFS网关查看
+                    {tCertificates("viewOnIPFS")}
                   </a>
                 )}
               </div>
 
               {/* 元数据内容 */}
               <div>
-                <div className="text-sm font-medium mb-2 text-purple-400">JSON元数据</div>
+                <div className="text-sm font-medium mb-2 text-purple-400">{tCertificates("jsonMetadata")}</div>
                 <div className="rounded-md bg-foreground/5 border border-white/5 p-4">
                   <pre className="text-xs font-mono whitespace-pre-wrap overflow-auto max-h-[300px]">
                     {JSON.stringify(metadataContent, null, 2)}
@@ -220,7 +224,7 @@ function CertificatesContent({ certificates }: { certificates: Certificate[] }) 
               {/* 元数据属性 */}
               {metadataContent.attributes && metadataContent.attributes.length > 0 && (
                 <div className="mt-4">
-                  <div className="text-sm font-medium mb-2 text-purple-400">证书属性</div>
+                  <div className="text-sm font-medium mb-2 text-purple-400">{tCertificates("certificateAttributes")}</div>
                   <div className="grid grid-cols-2 gap-3">
                     {metadataContent.attributes.map((attr: any, idx: number) => (
                       <div key={idx} className="p-3 rounded-md bg-foreground/5 border border-white/5 hover:border-purple-500/20 transition-all duration-300">
@@ -234,14 +238,14 @@ function CertificatesContent({ certificates }: { certificates: Certificate[] }) 
 
               <DialogClose asChild>
                 <Button className="w-full mt-6 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-md hover:shadow-lg border-0">
-                  关闭
+                  {tCertificates("close")}
                 </Button>
               </DialogClose>
             </div>
           ) : (
             <div className="text-center py-8 text-foreground/60">
-              <div className="mb-2 text-red-400">无法加载元数据内容</div>
-              <p className="text-sm">元数据可能尚未在IPFS上可用或者URI格式不正确</p>
+              <div className="mb-2 text-red-400">{tCertificates("unableToLoadMetadata")}</div>
+              <p className="text-sm">{tCertificates("metadataNotAvailable")}</p>
             </div>
           )}
         </DialogContent>

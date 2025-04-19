@@ -22,8 +22,11 @@ import { redirect } from "next/navigation";
 import PurchasedCoursesList from "./PurchasedCoursesList";
 import CertificatesList from "./CertificatesList";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
 
 export default function CoursesClient() {
+  const tCourses = useTranslations('Courses');
+  const tUser = useTranslations('User');
   const { isSignedIn } = useSIWE();
   const { isConnected } = useAccount();
   const [purchasedCourses, setPurchasedCourses] = useState<CourseResponseDto[]>([]);
@@ -40,8 +43,8 @@ export default function CoursesClient() {
   // 如果用户未登录，重定向到首页
   useEffect(() => {
     if (!isSignedIn) {
-      toast.error("请先登录", {
-        description: "请先登录后再访问学习中心"
+      toast.error(tUser("login"), {
+        description: tUser("loginDesc")
       });
       redirect("/");
     }
@@ -84,8 +87,8 @@ export default function CoursesClient() {
       setPurchasedCourses(coursesData);
     } catch (error) {
       console.error("获取用户课程失败:", error);
-      toast.error("获取课程失败", {
-        description: "无法加载您的课程，请稍后重试"
+      toast.error(tCourses("loadCoursesError"), {
+        description: tCourses("loadCoursesErrorDesc")
       });
     } finally {
       setIsLoadingCourses(false);
@@ -160,8 +163,8 @@ export default function CoursesClient() {
       setCertificates(allCertificates);
     } catch (error) {
       console.error("获取证书失败:", error);
-      toast.error("获取证书失败", {
-        description: "无法从区块链获取您的证书，请稍后重试"
+      toast.error(tCourses("loadCertificatesError"), {
+        description: tCourses("loadCertificatesErrorDesc")
       });
     } finally {
       setIsLoadingCertificates(false);
@@ -195,7 +198,7 @@ export default function CoursesClient() {
   // 刷新代币余额
   const handleRefreshBalance = () => {
     fetchYidengBalance();
-    toast.success("余额已更新");
+    toast.success(tCourses("refreshBalanceSuccess"));
   };
 
   // 数据卡片的骨架屏
@@ -228,7 +231,7 @@ export default function CoursesClient() {
                   <BookOpen className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-foreground/40 text-sm">已购课程</p>
+                  <p className="text-foreground/40 text-sm">{tCourses("purchasedCourses")}</p>
                   <h3 className="text-2xl font-bold">{purchasedCourses.length}</h3>
                 </div>
               </div>
@@ -247,7 +250,7 @@ export default function CoursesClient() {
                   <Award className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-foreground/40 text-sm">获得证书</p>
+                  <p className="text-foreground/40 text-sm">{tCourses("getCertificate")}</p>
                   <h3 className="text-2xl font-bold">{certificates.length}</h3>
                 </div>
               </div>
@@ -267,7 +270,7 @@ export default function CoursesClient() {
                     <Wallet className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-foreground/40 text-sm">YIDENG余额</p>
+                    <p className="text-foreground/40 text-sm">{tCourses("yidengBalance")}</p>
                     <h3 className="text-2xl font-bold">{yidengBalance.toString()}</h3>
                   </div>
                 </div>
@@ -289,7 +292,7 @@ export default function CoursesClient() {
           >
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 flex-shrink-0" />
-              <span>我的课程</span>
+              <span>{tCourses("courses")}</span>
             </div>
           </TabsTrigger>
           <TabsTrigger
@@ -298,16 +301,16 @@ export default function CoursesClient() {
           >
             <div className="flex items-center gap-2">
               <Award className="h-4 w-4 flex-shrink-0" />
-              <span>我的证书</span>
+              <span>{tCourses("certificates")}</span>
             </div>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="courses" className="focus-visible:outline-none focus-visible:ring-0">
           <div className="mb-4">
-            <h2 className="text-xl font-semibold text-primary/90">我的课程</h2>
+            <h2 className="text-xl font-semibold text-primary/90">{tCourses("courses")}</h2>
             <p className="text-foreground/40 text-sm mt-1">
-              查看已购买的课程，继续您的学习之旅
+              {tCourses("coursesDesc")}
             </p>
           </div>
           <PurchasedCoursesList courses={purchasedCourses} isLoading={isLoadingCourses} />
@@ -315,9 +318,9 @@ export default function CoursesClient() {
 
         <TabsContent value="certificates" className="focus-visible:outline-none focus-visible:ring-0">
           <div className="mb-4">
-            <h2 className="text-xl font-semibold text-primary/90">我的证书</h2>
+            <h2 className="text-xl font-semibold text-primary/90">{tCourses("certificates")}</h2>
             <p className="text-foreground/40 text-sm mt-1">
-              完成课程学习后获得的区块链证书
+              {tCourses("certificatesDesc")}
             </p>
           </div>
           <CertificatesList certificates={certificates} isLoading={isLoadingCertificates} />

@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlayCircle, Image } from "lucide-react";
 import { CourseResponseDto } from "@/api/models/CourseResponseDto";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
 
 interface PurchasedCoursesListProps {
   courses: CourseResponseDto[];
@@ -51,6 +52,7 @@ function EmptyCoursesList() {
 
 // 课程列表内容
 function CourseContent({ courses }: { courses: CourseResponseDto[] }) {
+  const tCourses = useTranslations("Courses");
   if (courses.length === 0) {
     return <EmptyCoursesList />;
   }
@@ -70,17 +72,17 @@ function CourseContent({ courses }: { courses: CourseResponseDto[] }) {
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="px-2 py-1 text-xs rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
-                  已购买
+                  {tCourses("hasPurchased")}
                 </span>
                 <span className="px-2 py-1 text-xs rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                  {course.category?.name || "未分类"}
+                  {course.category?.name || tCourses("unClassified")}
                 </span>
               </div>
               <h3 className="text-xl font-semibold mb-2 line-clamp-1">{course.name}</h3>
               <p className="text-foreground/40 text-sm mb-4 line-clamp-2">{course.description}</p>
               <Button variant="outline" size="sm" className="group">
                 <PlayCircle className="h-4 w-4 mr-2 group-hover:text-primary transition-colors" />
-                继续学习
+                {tCourses("continueLearning")}
               </Button>
             </CardContent>
           </Card>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, forwardRef, useMemo, HTMLAttributes } from "react";
+import { useState, useEffect, forwardRef, HTMLAttributes } from "react";
 import { ArrowDown, Info, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { ETH_TO_YIDENG_RATIO } from "@/lib/contract-config";
 import { useAccount, useBalance } from "wagmi";
 import { useYiDengToken } from "@/lib/contract-hooks";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 
 interface TokenExchangeProps extends HTMLAttributes<HTMLDivElement> {
@@ -17,6 +19,7 @@ interface TokenExchangeProps extends HTMLAttributes<HTMLDivElement> {
 
 export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
   ({ className, ...props }, ref) => {
+    const t = useTranslations('TokenExchange');
     const [amount, setAmount] = useState("1.0");
     const { address, isConnected } = useAccount();
     const { exchangeTokens, getBalance, status, error, isLoading } = useYiDengToken();
@@ -30,7 +33,7 @@ export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
     // 定期获取YIDENG代币余额
     useEffect(() => {
       let isMounted = true;
-      
+
       const fetchBalance = async () => {
         if (isConnected && address) {
           try {
@@ -43,11 +46,11 @@ export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
           }
         }
       };
-      
+
       fetchBalance();
       // 每10秒刷新一次余额
       const interval = setInterval(fetchBalance, 10000);
-      
+
       return () => {
         isMounted = false;
         clearInterval(interval);
@@ -60,21 +63,21 @@ export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
     // 处理表单提交
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      
+
       try {
         // 先将浮点数转换为wei单位的BigInt
         const amountFloat = parseFloat(amount || "0");
         console.log("amountFloat", amountFloat);
-        
+
         // 1 ETH = 10^18 Wei
-        const amountInWei = BigInt(Math.floor(amountFloat * 10**18));
+        const amountInWei = BigInt(Math.floor(amountFloat * 10 ** 18));
         console.log("amountInWei", amountInWei);
-        
+
         // 调用合约进行兑换
         exchangeTokens(amountInWei);
       } catch (error) {
         console.error("转换错误:", error);
-        alert("金额转换错误，请输入有效数字");
+        toast.error(t('InvalidInput'));
       }
     };
 
@@ -84,14 +87,14 @@ export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
         return (
           <div className="mt-4 p-3 bg-yellow-500/10 text-yellow-500 rounded-lg flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>交易处理中，请稍候...</span>
+            <span>{t('ExchangeProcessing')}</span>
           </div>
         );
       } else if (status === 'success') {
         return (
           <div className="mt-4 p-3 bg-green-500/10 text-green-500 rounded-lg flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            <span>交易成功！您已获得 {yidengAmount.toFixed(2)} YIDENG 代币</span>
+            <span>{t('ExchangeSuccess', { yidengAmount: yidengAmount.toFixed(2) })}</span>
           </div>
         );
       } else if (status === 'error' && error) {
@@ -113,10 +116,10 @@ export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
           className
         )}
         {...props}
-      > 
+      >
         <CardContent className="p-6">
           <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-xl font-bold text-foreground bg-clip-text bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400">ETH兑换YIDENG代币</h3>
+            <h3 className="text-xl font-bold text-foreground bg-clip-text bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400">{t('title')}</h3>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Info className="h-4 w-4" />
             </Button>
@@ -125,11 +128,11 @@ export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="rounded-lg border border-purple-500/20 bg-background/80 p-4">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">从</span>
+                <span className="text-sm text-muted-foreground">{t('from')}</span>
                 <span className="text-xs text-muted-foreground">
-                  余额: {isConnected ? 
-                    `${ethBalanceData?.formatted || "0.00"} ${ethBalanceData?.symbol || "ETH"}` : 
-                    "未连接钱包"}
+                  {t('balance')}: {isConnected ?
+                    `${ethBalanceData?.formatted || "0.00"} ${ethBalanceData?.symbol || "ETH"}` :
+                    t('notConnected')}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -164,11 +167,11 @@ export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
 
             <div className="rounded-lg border border-indigo-500/20 bg-background/80 p-4">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">到</span>
+                <span className="text-sm text-muted-foreground">{t('to')}</span>
                 <span className="text-xs text-muted-foreground">
-                  余额: {isConnected ? 
-                    `${yidengBalance} YIDENG` : 
-                    "未连接钱包"}
+                  {t('balance')}: {isConnected ?
+                    `${yidengBalance} YIDENG` :
+                    t('notConnected')}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -192,12 +195,12 @@ export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
 
             <div className="rounded-lg bg-secondary/30 p-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">兑换率</span>
+                <span className="text-muted-foreground">{t('rate')}</span>
                 <span>1 ETH = {ETH_TO_YIDENG_RATIO} YIDENG</span>
               </div>
             </div>
 
-            <Button 
+            <Button
               type="submit"
               className="w-full bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 text-white hover:opacity-90"
               disabled={!isConnected || !amount || parseFloat(amount) <= 0 || isLoading}
@@ -205,15 +208,15 @@ export const TokenExchange = forwardRef<HTMLDivElement, TokenExchangeProps>(
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  兑换处理中...
+                  {t('ExchangeProcessing')}
                 </span>
               ) : isConnected ? (
-                "确认兑换"
+                t('confirm')
               ) : (
-                "请先连接钱包"
+                t('notConnected')
               )}
             </Button>
-            
+
             {/* 交易状态信息 */}
             {renderStatus()}
           </form>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Zap, ShoppingCart, CheckCircle, BookOpen, FileText, ArrowLeft, Loader2, AlertCircle, Shield, Check } from "lucide-react";
 import { CourseSections } from "@/components/course/CourseSections";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { CourseResponseDto as Course } from "@/api/models/CourseResponseDto";
 import { useCourseMarket } from "@/lib/contract-hooks";
 import { useAccount } from "wagmi";
@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 
 interface CourseSection {
   id: number;
@@ -35,6 +36,9 @@ interface CourseDetailClientProps {
 }
 
 export function CourseDetailClient({ course, sections }: CourseDetailClientProps) {
+  const tCourses = useTranslations('Courses');
+  const tCommon = useTranslations('Common');
+  const tWallet = useTranslations('Wallet');
   const { purchaseCourse, approve, getAllowance, hasCourse } = useCourseMarket();
   const { isConnected } = useAccount();
   const [isPurchased, setIsPurchased] = useState(false);
@@ -108,7 +112,7 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
     if (approveAmount === 'custom') {
       // 使用自定义金额
       if (!customApproveAmount || isNaN(Number(customApproveAmount))) {
-        toast.error("请输入有效的授权金额");
+        toast.error(tCourses("invalidInput"));
         return;
       }
       amountToApprove = BigInt(Number(customApproveAmount));
@@ -121,23 +125,23 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
     }
 
     if (amountToApprove <= BigInt(0)) {
-      toast.error("授权金额必须大于0");
+      toast.error(tCourses("invalidAmount"));
       return;
     }
 
     setApproveStatus('loading');
 
     try {
-      toast.info("代币授权中...", {
-        description: "请在钱包中确认授权交易"
+      toast.info(tCourses("approvePending"), {
+        description: tCourses("approvePendingDesc")
       });
 
       await approve(amountToApprove);
       setApproveStatus('success');
       setShowApproveModal(false);
 
-      toast.success("代币授权成功", {
-        description: `成功授权 ${amountToApprove.toString()} YIDENG`
+      toast.success(tCourses("approveSuccess"), {
+        description: tCourses("approveDesc", { amount: amountToApprove.toString() })
       });
 
       // 更新授权额度
@@ -147,12 +151,12 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
       setApproveStatus('error');
 
       if (err.message?.includes("user rejected")) {
-        toast.error("授权已取消", {
-          description: "您取消了交易签名",
+        toast.error(tCourses("approveCanceled"), {
+          description: tCourses("approveCanceledDesc"),
         });
       } else {
-        toast.error("授权失败", {
-          description: err.message || "请稍后重试",
+        toast.error(tCourses("approveError"), {
+          description: err.message || tCourses("approveErrorDesc"),
         });
       }
     } finally {
@@ -167,22 +171,22 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
   // 修改购买课程方法
   const handlePurchaseCourse = async () => {
     if (!isConnected) {
-      toast.error("请先连接钱包", {
-        description: "购买课程需要连接钱包"
+      toast.error(tWallet("connectWallet"), {
+        description: tWallet("purchaseCourse")
       });
       return;
     }
 
     if (!course.id) {
-      toast.error("课程ID无效");
+      toast.error(tCourses("invalidCourseId"));
       return;
     }
 
     // 检查授权额度是否足够
     const coursePrice = BigInt(course.price);
     if (allowance < coursePrice) {
-      toast.error("授权额度不足", {
-        description: "请先授权足够的代币用于购买课程"
+      toast.error(tCourses("insufficientAllowance"), {
+        description: tCourses("insufficientAllowanceDesc")
       });
       setShowApproveModal(true);
       return;
@@ -196,8 +200,8 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
       const hash = await purchaseCourse(course.id.toString());
       setTxHash(hash);
       setPurchaseStatus('success');
-      toast.success("课程购买成功", {
-        description: "您现在可以访问所有章节内容",
+      toast.success(tCourses("purchaseSuccess"), {
+        description: tCourses("purchaseSuccessDesc"),
       });
 
       // 重新检查购买状态
@@ -210,22 +214,22 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
 
       // 针对不同错误类型显示不同提示
       if (err.message?.includes("insufficient funds")) {
-        toast.error("余额不足", {
-          description: "您的YIDENG代币余额不足，请先充值",
+        toast.error(tCourses("insufficientFunds"), {
+          description: tCourses("insufficientFundsDesc"),
         });
       } else if (err.message?.includes("user rejected")) {
-        toast.error("交易已取消", {
-          description: "您取消了交易签名",
+        toast.error(tCourses("transactionCanceled"), {
+          description: tCourses("transactionCanceledDesc"),
         });
       } else if (err.message?.includes("already purchased")) {
-        toast.error("已购买课程", {
-          description: "您已经购买过此课程",
+        toast.error(tCourses("alreadyPurchased"), {
+          description: tCourses("alreadyPurchasedDesc"),
         });
         // 重新检查购买状态
         await checkPurchaseStatus();
       } else {
-        toast.error("购买失败", {
-          description: err.message || "请稍后重试",
+        toast.error(tCourses("purchaseError"), {
+          description: err.message || tCourses("purchaseErrorDesc"),
         });
       }
     } finally {
@@ -250,7 +254,7 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
           onClick={handleBackClick}
         >
           <ArrowLeft className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-          <span className="transition-colors duration-300 group-hover:text-primary">返回课程列表</span>
+          <span className="transition-colors duration-300 group-hover:text-primary">{tCourses("back")}</span>
         </Button>
       </div>
 
@@ -267,10 +271,10 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4 flex-wrap">
           <span className="px-3 py-1 text-sm rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 transition-all duration-300 hover:bg-blue-500/20 hover:border-blue-500/30">
-            {course.category?.name || "未分类"}
+            {course.category?.name || tCourses("unClassified")}
           </span>
           <span className="text-sm text-foreground/40">
-            更新于 {new Date(course.updatedAt).toLocaleDateString('zh-CN')}
+            {tCourses("updatedAt")} {new Date(course.updatedAt).toLocaleDateString('zh-CN')}
           </span>
         </div>
 
@@ -294,17 +298,17 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
               {isCheckingAllowance ? (
                 <span className="flex items-center">
                   <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                  检查授权中...
+                  {tCourses("checkAllowance")}
                 </span>
               ) : (
                 <span>
-                  当前授权: <span className="font-medium">{allowance.toString()} YIDENG</span>
+                  {tCourses("currentAllowance")} <span className="font-medium">{allowance.toString()} YIDENG</span>
                   {allowance < BigInt(course.price) ? (
                     <button
                       onClick={() => setShowApproveModal(true)}
                       className="ml-2 text-blue-500 underline cursor-pointer"
                     >
-                      授权代币
+                      {tCourses("approveToken")}
                     </button>
                   ) : null}
                 </span>
@@ -322,22 +326,22 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
           {isCheckingPurchase ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span>检查中...</span>
+              <span>{tCourses("checkPurchase")}</span>
             </>
           ) : isPurchased ? (
             <>
               <CheckCircle className="h-5 w-5" />
-              <span>已购买</span>
+              <span>{tCourses("hasPurchased")}</span>
             </>
           ) : purchaseStatus === 'loading' ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span>购买中...</span>
+              <span>{tCourses("purchasing")}</span>
             </>
           ) : (
             <>
               <ShoppingCart className="h-5 w-5" />
-              <span>购买该课程</span>
+              <span>{tCourses("purchase")}</span>
             </>
           )}
         </Button>
@@ -347,20 +351,20 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
       <Dialog open={showApproveModal} onOpenChange={setShowApproveModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>授权代币</DialogTitle>
+            <DialogTitle>{tCourses("approveToken")}</DialogTitle>
             <DialogDescription>
-              请选择您希望授权的代币数量。授权后，智能合约将能够使用您授权的代币进行课程购买。
+              {tCourses("approveDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="flex items-center justify-between">
-              <span className="font-medium">课程价格:</span>
+              <span className="font-medium">{tCourses("price")}</span>
               <span className="font-mono">{course.price} YIDENG</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="font-medium">当前授权:</span>
+              <span className="font-medium">{tCourses("currentAllowance")}</span>
               <span className="font-mono">{allowance.toString()} YIDENG</span>
             </div>
 
@@ -377,7 +381,7 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
               >
                 <div className="flex items-center">
                   {approveAmount === "exact" && <Check className="h-4 w-4 mr-2 text-primary" />}
-                  <span>授权课程价格</span>
+                  <span>{tCourses("approveCoursePrice")}</span>
                 </div>
                 <span className="font-mono">{course.price} YIDENG</span>
               </button>
@@ -392,7 +396,7 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
               >
                 <div className="flex items-center">
                   {approveAmount === "double" && <Check className="h-4 w-4 mr-2 text-primary" />}
-                  <span>授权两倍课程价格</span>
+                  <span>{tCourses("approveDoublePrice")}</span>
                 </div>
                 <span className="font-mono">{BigInt(course.price) * BigInt(2)} YIDENG</span>
               </button>
@@ -410,13 +414,13 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
                     className="flex items-center"
                   >
                     {approveAmount === "custom" && <Check className="h-4 w-4 mr-2 text-primary" />}
-                    <span>自定义授权金额</span>
+                    <span>{tCourses("customApproveAmount")}</span>
                   </button>
                 </div>
                 <Input
                   type="number"
                   min="0"
-                  placeholder="输入授权金额"
+                  placeholder={tCourses("approveAmount")}
                   value={customApproveAmount}
                   onChange={(e) => {
                     setCustomApproveAmount(e.target.value);
@@ -432,7 +436,7 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowApproveModal(false)}>
-              取消
+              {tCommon("cancel")}
             </Button>
             <Button
               onClick={handleApprove}
@@ -442,10 +446,10 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
               {approveStatus === 'loading' ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  授权中...
+                  {tCourses("approvePending")}
                 </>
               ) : (
-                '确认授权'
+                tCourses("approveConfirm")
               )}
             </Button>
           </DialogFooter>
@@ -461,7 +465,7 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
           >
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 flex-shrink-0" />
-              <span>课程概述</span>
+              <span>{tCourses("courseOverview")}</span>
             </div>
           </TabsTrigger>
           <TabsTrigger
@@ -470,7 +474,7 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
           >
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 flex-shrink-0" />
-              <span>章节内容</span>
+              <span>{tCourses("courseSections")}</span>
               {sections.length > 0 && (
                 <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded-full text-xs bg-primary/10 text-primary min-w-5 text-center">
                   {sections.length}
@@ -482,20 +486,20 @@ export function CourseDetailClient({ course, sections }: CourseDetailClientProps
 
         <TabsContent value="overview" className="focus-visible:outline-none focus-visible:ring-0">
           <div className="p-6 bg-gradient-to-br from-background/80 to-background/40 border border-white/[0.05] rounded-xl transition-all duration-300 hover:border-purple-500/10">
-            <h2 className="text-xl font-semibold mb-4 text-primary/90">课程概述</h2>
+            <h2 className="text-xl font-semibold mb-4 text-primary/90">{tCourses("courseOverview")}</h2>
             <p className="text-foreground/60 whitespace-pre-line">
-              {course.description || "暂无详细介绍"}
+              {course.description || tCourses("noDescription")}
             </p>
           </div>
         </TabsContent>
 
         <TabsContent value="sections" className="focus-visible:outline-none focus-visible:ring-0">
           <div className="mb-4">
-            <h2 className="text-xl font-semibold text-primary/90">章节列表</h2>
+            <h2 className="text-xl font-semibold text-primary/90">{tCourses("chapterList")}</h2>
             <p className="text-foreground/40 text-sm mt-1">
               {isPurchased
-                ? "您已购买此课程，可以观看所有章节内容"
-                : "购买课程后即可观看所有章节内容"}
+                ? tCourses("purchasedDescription")
+                : tCourses("purchaseDescription")}
             </p>
           </div>
 
