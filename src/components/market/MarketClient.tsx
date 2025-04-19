@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { CourseSkeletons } from "./CourseSkeletons";
 import { CourseList } from "./CourseList";
 import { CourseService } from "@/api";
 import { CourseResponseDto as Course } from "@/api/models/CourseResponseDto";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface Category {
   id: number;
@@ -24,6 +26,8 @@ interface MarketClientProps {
 }
 
 export function MarketClient({ courses, categories }: MarketClientProps) {
+  const t = useTranslations('Market');
+  const tCourses = useTranslations('Courses');
   const router = useRouter();
   const searchParams = useSearchParams();
   const initCategoryId = searchParams.get('categoryId')
@@ -55,14 +59,14 @@ export function MarketClient({ courses, categories }: MarketClientProps) {
         setDisplayedCourses(result.data.items as Course[]);
       } else {
         setDisplayedCourses([]);
-        toast.warning("未找到课程", {
-          description: "该分类下暂无课程"
+        toast.warning(t("noCourses"), {
+          description: t("noCoursesDesc")
         });
       }
     } catch (error) {
       console.error("获取课程出错:", error);
-      toast.error("获取课程失败", {
-        description: "加载课程数据时出现错误，请稍后重试"
+      toast.error(tCourses("loadCoursesError"), {
+        description: tCourses("loadCoursesErrorDesc")
       });
       // 出错时回退到原有数据
       setDisplayedCourses(courses);
@@ -95,7 +99,7 @@ export function MarketClient({ courses, categories }: MarketClientProps) {
           className="rounded-full cursor-pointer"
           disabled={isLoading}
         >
-          全部
+          {t("all")}
         </Button>
 
         {categories.map(category => (

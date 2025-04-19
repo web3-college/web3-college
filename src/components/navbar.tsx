@@ -1,20 +1,22 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { Menu, X, Zap } from "lucide-react"
+import { Link } from "@/i18n/navigation"
+import { usePathname } from "@/i18n/navigation"
+import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ConnectKitButton, useSIWE } from "connectkit"
+import { ConnectKitButton } from "connectkit"
 import { AuthService } from "@/api/services/AuthService"
+import { useTranslations } from "next-intl"
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 export function Navbar() {
+  const t = useTranslations("Navbar")
   const [navLinks, setNavLinks] = useState([
-    { name: "首页", path: "/" },
-    { name: "购买课程", path: "/market" },
-    { name: "课程中心", path: "/courses" },
+    { name: t("home"), path: "/" },
+    { name: t("market"), path: "/market" },
+    { name: t("courses"), path: "/courses" },
   ])
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -23,9 +25,9 @@ export function Navbar() {
   const checkAdmin = async () => {
     const isAdmin = await AuthService.authControllerIsAdmin()
     if (isAdmin.data?.hasAccess) {
-      setNavLinks([...navLinks, { name: "后台管理", path: "/admin" }])
+      setNavLinks([...navLinks, { name: t("admin"), path: "/admin" }])
     } else {
-      setNavLinks(navLinks.filter((link) => link.name !== "后台管理"))
+      setNavLinks(navLinks.filter((link) => link.name !== t("admin")))
     }
   }
 
@@ -57,7 +59,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <img src={"/logo/logo-transparent-jpeg.jpeg"} alt="logo" className="w-8 h-8" />
-          <span className="font-bold text-xl tracking-tight">web3大学</span>
+          <span className="font-bold text-xl tracking-tight">{t("title")}</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -80,6 +82,7 @@ export function Navbar() {
 
         {/* Connect Wallet */}
         <div className="hidden md:flex items-center gap-4">
+          <LanguageSwitcher />
           <ConnectKitButton />
         </div>
 
@@ -116,6 +119,9 @@ export function Navbar() {
                   {link.name}
                 </Link>
               ))}
+            </div>
+            <div className="flex justify-center pt-2 border-t border-white/[0.05]">
+              <LanguageSwitcher />
             </div>
           </div>
         </div>

@@ -98,12 +98,23 @@ const config = createConfig(
 
 const queryClient = new QueryClient();
 
-export const Web3Provider = ({ children }: { children: React.ReactNode }) => {
+export const Web3Provider = ({ children, locale }: { children: React.ReactNode, locale: string }) => {
+  const languages = {
+    'en': 'en-US',
+    'zh': 'zh-CN'
+  } as const;
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <SIWEProvider {...siweConfig}>
-          <ConnectKitProvider theme="soft">{children}</ConnectKitProvider>
+          <ConnectKitProvider
+            theme="soft"
+            options={{
+              language: languages[locale as keyof typeof languages],
+            }}
+          >
+            {children}
+          </ConnectKitProvider>
         </SIWEProvider>
       </QueryClientProvider>
     </WagmiProvider>

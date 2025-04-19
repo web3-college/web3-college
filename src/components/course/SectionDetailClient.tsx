@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useTransition, useRef, useCallback, useMemo } from "react";
-import { notFound, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import { useCourseMarket } from "@/lib/contract-hooks";
 import { CourseService } from "@/api/services/CourseService";
 import { useSIWE } from "connectkit";
 import { SectionStatus } from "@/types";
+import { useTranslations } from "next-intl";
 
 interface CourseSection {
   id: number;
@@ -34,6 +36,7 @@ export function SectionDetailClient({
   courseId,
   sectionId
 }: SectionDetailClientProps) {
+  const tCourseSections = useTranslations('CourseSections');
   const router = useRouter();
   const [isPurchased, setIsPurchased] = useState(false);
   const [sections, setSections] = useState<CourseSection[]>([]);
@@ -86,16 +89,16 @@ export function SectionDetailClient({
 
       // 如果没有访问权限，才显示提示
       if (!hasAccess) {
-        toast("需要购买课程", {
-          description: "该章节需要购买后才能观看",
+        toast(tCourseSections("needPurchase"), {
+          description: tCourseSections("needPurchaseDesc"),
           action: {
-            label: "购买课程",
+            label: tCourseSections("purchaseWatch"),
             onClick: () => navigateToCoursePage()
           }
         });
       } else if (!isSignedIn) {
-        toast("需要登录", {
-          description: "请先登录才能观看课程",
+        toast(tCourseSections("needLogin"), {
+          description: tCourseSections("needLoginDesc"),
         });
       }
       // 如果有之前的观看位置，设置初始时间
@@ -109,8 +112,8 @@ export function SectionDetailClient({
       }
     } catch (error) {
       console.error("获取章节数据失败:", error);
-      toast.error("获取章节数据失败", {
-        description: "请稍后重试"
+      toast.error(tCourseSections("getSectionsError"), {
+        description: tCourseSections("getSectionsErrorDesc")
       });
     } finally {
       setIsLoadingSections(false);
@@ -180,8 +183,8 @@ export function SectionDetailClient({
 
       // 如果是退出时保存且是完成状态，显示提示
       if (isExiting && isCompleted) {
-        toast.success("章节已完成", {
-          description: "您已成功完成本章节学习"
+        toast.success(tCourseSections("sectionCompleted"), {
+          description: tCourseSections("sectionCompletedDesc")
         });
       }
 
@@ -224,20 +227,20 @@ export function SectionDetailClient({
 
       // 如果下一节是免费或已购买，显示提示
       if (nextSection.isPreview || isPurchased) {
-        toast("本章节已完成", {
-          description: "是否播放下一章节？",
+        toast(tCourseSections("sectionCompleted"), {
+          description: tCourseSections("sectionCompletedDesc"),
           action: {
-            label: "播放下一章",
+            label: tCourseSections("playNext"),
             onClick: () => navigateToSection('next')
           }
         });
       }
     } else {
       // 如果是最后一个视频，显示完成提示
-      toast.success("恭喜！", {
-        description: "您已完成课程的所有章节",
+      toast.success(tCourseSections("congratulations"), {
+        description: tCourseSections("congratulationsDesc"),
         action: {
-          label: "返回课程",
+          label: tCourseSections("backToCourse"),
           onClick: () => navigateToCoursePage()
         }
       });
@@ -276,10 +279,10 @@ export function SectionDetailClient({
     // 检查是否有权限访问
     const targetSection = sections[newIndex];
     if (!isPurchased && !targetSection.isPreview) {
-      toast("需要购买课程", {
-        description: "购买课程后即可观看所有章节",
+      toast(tCourseSections("needPurchase"), {
+        description: tCourseSections("needPurchaseDesc"),
         action: {
-          label: "购买课程",
+          label: tCourseSections("purchaseWatch"),
           onClick: () => navigateToCoursePage()
         }
       });
@@ -303,7 +306,7 @@ export function SectionDetailClient({
           disabled={isPending}
         >
           <ArrowLeft className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-          <span className="transition-colors duration-300 group-hover:text-primary">返回课程</span>
+          <span className="transition-colors duration-300 group-hover:text-primary">{tCourseSections("backToCourse")}</span>
         </Button>
       </div>
 
@@ -312,7 +315,7 @@ export function SectionDetailClient({
         <div className="w-full aspect-video flex items-center justify-center bg-background/40 rounded-lg border border-white/10">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-foreground/60">加载章节数据中...</p>
+            <p className="text-foreground/60">{tCourseSections("loading")}</p>
           </div>
         </div>
       ) : (
@@ -331,7 +334,7 @@ export function SectionDetailClient({
               </div>
             ) : (
               <div className="w-full aspect-video flex items-center justify-center bg-background/40 rounded-lg border border-white/10">
-                <p className="text-foreground/40">视频不存在</p>
+                <p className="text-foreground/40">{tCourseSections("videoNotFound")}</p>
               </div>
             )}
           </div>
@@ -340,17 +343,17 @@ export function SectionDetailClient({
           <div className="mb-8">
             <h1 className="text-2xl md:text-3xl font-bold mb-3">{currentSection.title}</h1>
             <p className="text-foreground/60 whitespace-pre-line">
-              {currentSection.description || "暂无章节描述"}
+              {currentSection.description || tCourseSections("noDescription")}
             </p>
 
             {/* 播放进度信息 - 仅对已购买用户显示 */}
             {isPurchased && (
               <div className="mt-4 p-4 bg-background/10 rounded-lg border border-white/[0.05]">
                 <div className="flex justify-between items-center text-sm text-foreground/60">
-                  <span>观看进度: {Math.round(progress)}%</span>
+                  <span>{tCourseSections("watchProgress")}: {Math.round(progress)}%</span>
                   <span>
-                    {new Date(currentTime * 1000).toISOString().substr(14, 5)} /
-                    {duration ? new Date(duration * 1000).toISOString().substr(14, 5) : "00:00"}
+                    {new Date(currentTime * 1000).toISOString().substring(14, 5)} /
+                    {duration ? new Date(duration * 1000).toISOString().substring(14, 5) : "00:00"}
                   </span>
                 </div>
               </div>
@@ -366,7 +369,7 @@ export function SectionDetailClient({
               className="transition-all duration-300 hover:bg-foreground/5 active:scale-95"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
-              上一章
+              {tCourseSections("prevSection")}
             </Button>
 
             <Button
@@ -375,7 +378,7 @@ export function SectionDetailClient({
               disabled={isPending || sections.findIndex(s => s.id === currentSection.id) === sections.length - 1}
               className="transition-all duration-300 hover:bg-foreground/5 active:scale-95"
             >
-              下一章
+              {tCourseSections("nextSection")}
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
