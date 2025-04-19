@@ -84,11 +84,11 @@ export function SectionDetailClient({
       console.log('currentSection', currentSection);
 
       setCurrentSection(currentSection);
-      const hasAccess = currentSection.isPreview || await hasCourse(courseId.toString());
-      setIsPurchased(!currentSection.isPreview && hasAccess);
+      const result = await hasCourse(courseId.toString());
+      setIsPurchased(result);
 
       // 如果没有访问权限，才显示提示
-      if (!hasAccess) {
+      if (!result && !currentSection.isPreview) {
         toast(tCourseSections("needPurchase"), {
           description: tCourseSections("needPurchaseDesc"),
           action: {
@@ -250,7 +250,7 @@ export function SectionDetailClient({
   // 返回课程详情页
   const navigateToCoursePage = () => {
     // 在导航前更新进度
-    if (isPurchased && isSignedIn) {
+    if (hasPermission && isSignedIn) {
       updateProgress(true);
     }
 
@@ -262,7 +262,7 @@ export function SectionDetailClient({
   // 切换到上一章或下一章
   const navigateToSection = (direction: 'prev' | 'next') => {
     // 在导航前更新当前章节进度
-    if (isPurchased && isSignedIn) {
+    if (hasPermission && isSignedIn) {
       updateProgress(true);
     }
 
