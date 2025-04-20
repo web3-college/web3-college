@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Web3 College",
   description: "Learn about Web3 and blockchain technology",
   icons: {
-    icon: "/logo/logo-transparent-jpeg.jpeg",
+    icon: "/icon.jpeg",
   },
 };
 

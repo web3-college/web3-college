@@ -10,6 +10,7 @@ import { ConnectKitButton } from "connectkit"
 import { AuthService } from "@/api/services/AuthService"
 import { useTranslations } from "next-intl"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import Image from "next/image"
 
 export function Navbar() {
   const t = useTranslations("Navbar")
@@ -58,7 +59,15 @@ export function Navbar() {
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <img src={"/logo/logo-transparent-jpeg.jpeg"} alt="logo" className="w-8 h-8" />
+          <div className="w-8 h-8 relative">
+            <Image
+              src={"/icon.jpeg"}
+              fill
+              sizes="32px"
+              className="object-contain"
+              alt="logo"
+            />
+          </div>
           <span className="font-bold text-xl tracking-tight">{t("title")}</span>
         </Link>
 
