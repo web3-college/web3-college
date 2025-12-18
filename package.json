@@ -64,6 +64,7 @@
     "tailwindcss": "^4",
     "typechain": "^8.3.2",
     "typescript": "^5",
-    "worker-loader": "^3.0.8"
+    "worker-loader": "^3.0.8",
+    "wrangler": "^4.55.0"
   }
 }
