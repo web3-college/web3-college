@@ -26,7 +26,7 @@ export class CourseService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/course',
+      url: '/api/v1/course',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -74,7 +74,7 @@ export class CourseService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/course',
+      url: '/api/v1/course',
       query: {
         'page': page,
         'pageSize': pageSize,
@@ -96,7 +96,7 @@ export class CourseService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/course/progress',
+      url: '/api/v1/course/progress',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -121,7 +121,7 @@ export class CourseService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/course/{id}',
+      url: '/api/v1/course/{id}',
       path: {
         'id': id,
       },
@@ -142,7 +142,7 @@ export class CourseService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/course/{id}',
+      url: '/api/v1/course/{id}',
       path: {
         'id': id,
       },
@@ -166,7 +166,7 @@ export class CourseService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'DELETE',
-      url: '/api/course/{id}',
+      url: '/api/v1/course/{id}',
       path: {
         'id': id,
       },
@@ -189,7 +189,7 @@ export class CourseService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/course/{courseId}/sections',
+      url: '/api/v1/course/{courseId}/sections',
       path: {
         'courseId': courseId,
       },
@@ -212,7 +212,7 @@ export class CourseService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/course/{courseId}/sections',
+      url: '/api/v1/course/{courseId}/sections',
       path: {
         'courseId': courseId,
       },
@@ -259,7 +259,7 @@ export class CourseService {
   }): CancelablePromise<CourseListResponseDto> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/course/creator/{address}',
+      url: '/api/v1/course/creator/{address}',
       path: {
         'address': address,
       },
@@ -285,7 +285,7 @@ export class CourseService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/course/purchase',
+      url: '/api/v1/course/purchase',
       body: requestBody,
       mediaType: 'application/json',
       errors: {

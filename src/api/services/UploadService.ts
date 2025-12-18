@@ -23,7 +23,7 @@ export class UploadService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/upload/check',
+      url: '/api/v1/upload/check',
       formData: formData,
       mediaType: 'multipart/form-data',
       errors: {
@@ -44,7 +44,7 @@ export class UploadService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/upload/image',
+      url: '/api/v1/upload/image',
       formData: formData,
       mediaType: 'multipart/form-data',
       errors: {
@@ -65,7 +65,7 @@ export class UploadService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/upload/video/small',
+      url: '/api/v1/upload/video/small',
       formData: formData,
       mediaType: 'multipart/form-data',
       errors: {
@@ -86,7 +86,7 @@ export class UploadService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/upload/video/init',
+      url: '/api/v1/upload/video/init',
       formData: formData,
       mediaType: 'multipart/form-data',
       errors: {
@@ -107,7 +107,7 @@ export class UploadService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/upload/video/part',
+      url: '/api/v1/upload/video/part',
       formData: formData,
       mediaType: 'multipart/form-data',
       errors: {
@@ -136,7 +136,7 @@ export class UploadService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/upload/video/parts',
+      url: '/api/v1/upload/video/parts',
       query: {
         'key': key,
         'uploadId': uploadId,
@@ -159,7 +159,7 @@ export class UploadService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/upload/video/complete',
+      url: '/api/v1/upload/video/complete',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -180,7 +180,7 @@ export class UploadService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/upload/video/abort',
+      url: '/api/v1/upload/video/abort',
       body: requestBody,
       mediaType: 'application/json',
       errors: {

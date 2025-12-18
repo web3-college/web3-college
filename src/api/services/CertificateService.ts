@@ -20,7 +20,7 @@ export class CertificateService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/certificate/request',
+      url: '/api/v1/certificate/request',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -42,7 +42,7 @@ export class CertificateService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/certificate/status',
+      url: '/api/v1/certificate/status',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -58,7 +58,7 @@ export class CertificateService {
   public static certificateControllerGetUserCertificateRequests(): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/certificate/user',
+      url: '/api/v1/certificate/user',
     });
   }
   /**
@@ -67,15 +67,11 @@ export class CertificateService {
    * @throws ApiError
    */
   public static certificateControllerGetAllCertificateRequests({
-    status,
     address,
     page,
     pageSize,
+    status,
   }: {
-    /**
-     * 证书状态过滤
-     */
-    status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ISSUED',
     /**
      * 用户钱包地址过滤
      */
@@ -88,15 +84,19 @@ export class CertificateService {
      * 每页数量，默认为10
      */
     pageSize?: number,
+    /**
+     * 证书状态过滤
+     */
+    status?: any,
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/certificate/all',
+      url: '/api/v1/certificate/all',
       query: {
-        'status': status,
         'address': address,
         'page': page,
         'pageSize': pageSize,
+        'status': status,
       },
     });
   }

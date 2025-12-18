@@ -22,7 +22,7 @@ export class AuthService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/auth/nonce',
+      url: '/api/v1/auth/nonce',
     });
   }
   /**
@@ -42,7 +42,7 @@ export class AuthService {
   }> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/auth/verify',
+      url: '/api/v1/auth/verify',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -66,7 +66,7 @@ export class AuthService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/auth/session',
+      url: '/api/v1/auth/session',
       errors: {
         401: `用户未登录`,
       },
@@ -88,7 +88,7 @@ export class AuthService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/auth/logout',
+      url: '/api/v1/auth/logout',
     });
   }
   /**
@@ -106,7 +106,7 @@ export class AuthService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/auth/isAdmin',
+      url: '/api/v1/auth/isAdmin',
       errors: {
         401: `用户未登录`,
       },

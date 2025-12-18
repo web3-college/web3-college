@@ -13,14 +13,14 @@ export class AppService {
   public static appControllerGetHello(): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api',
+      url: '/api/v1',
     });
   }
   /**
    * @returns any
    * @throws ApiError
    */
-  public static appControllerGetHello2V2(): CancelablePromise<any> {
+  public static appControllerGetHello2(): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/api/v2',

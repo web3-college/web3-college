@@ -29,6 +29,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "connectkit": "^1.9.0",
+    "ethers": "^6.16.0",
     "framer-motion": "^12.6.2",
     "hash-wasm": "^4.12.0",
     "lodash": "^4.17.21",
@@ -43,11 +44,11 @@
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.0.2",
     "tw-animate-css": "^1.2.5",
-    "viem": "2.12.0",
+    "viem": "^2.21.0",
     "wagmi": "^2.14.15"
   },
   "devDependencies": {
-    "@t-care/cli": "^1.2.0",
+    "@t-care/cli": "1.3.7",
     "@tailwindcss/postcss": "^4",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",

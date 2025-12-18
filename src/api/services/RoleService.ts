@@ -29,7 +29,7 @@ export class RoleService {
   }> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/role',
+      url: '/api/v1/role',
       body: requestBody,
       mediaType: 'application/json',
     });
@@ -68,7 +68,7 @@ export class RoleService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/role',
+      url: '/api/v1/role',
       query: {
         'page': page,
         'pageSize': pageSize,
@@ -97,7 +97,7 @@ export class RoleService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/role/{id}',
+      url: '/api/v1/role/{id}',
       path: {
         'id': id,
       },
@@ -126,7 +126,7 @@ export class RoleService {
   }> {
     return __request(OpenAPI, {
       method: 'PATCH',
-      url: '/api/role/{id}',
+      url: '/api/v1/role/{id}',
       path: {
         'id': id,
       },
@@ -155,7 +155,7 @@ export class RoleService {
   }> {
     return __request(OpenAPI, {
       method: 'DELETE',
-      url: '/api/role/{id}',
+      url: '/api/v1/role/{id}',
       path: {
         'id': id,
       },

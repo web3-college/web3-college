@@ -28,7 +28,7 @@ export class UsersService {
   }> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/users',
+      url: '/api/v1/users',
       body: requestBody,
       mediaType: 'application/json',
     });
@@ -68,7 +68,7 @@ export class UsersService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/users',
+      url: '/api/v1/users',
       query: {
         'page': page,
         'pageSize': pageSize,
@@ -97,7 +97,7 @@ export class UsersService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/users/{id}',
+      url: '/api/v1/users/{id}',
       path: {
         'id': id,
       },
@@ -125,7 +125,7 @@ export class UsersService {
   }> {
     return __request(OpenAPI, {
       method: 'PATCH',
-      url: '/api/users/{id}',
+      url: '/api/v1/users/{id}',
       path: {
         'id': id,
       },
@@ -153,7 +153,7 @@ export class UsersService {
   }> {
     return __request(OpenAPI, {
       method: 'DELETE',
-      url: '/api/users/{id}',
+      url: '/api/v1/users/{id}',
       path: {
         'id': id,
       },
@@ -181,7 +181,7 @@ export class UsersService {
   }> {
     return __request(OpenAPI, {
       method: 'PATCH',
-      url: '/api/users/roles/{id}',
+      url: '/api/v1/users/roles/{id}',
       path: {
         'id': id,
       },

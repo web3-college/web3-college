@@ -22,7 +22,7 @@ export class CategoryService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/category',
+      url: '/api/v1/category',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -65,7 +65,7 @@ export class CategoryService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/category',
+      url: '/api/v1/category',
       query: {
         'page': page,
         'pageSize': pageSize,
@@ -99,7 +99,7 @@ export class CategoryService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/category/list-all',
+      url: '/api/v1/category/list-all',
       query: {
         'isActive': isActive,
         'name': name,
@@ -122,7 +122,7 @@ export class CategoryService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/category/{id}',
+      url: '/api/v1/category/{id}',
       path: {
         'id': id,
       },
@@ -149,7 +149,7 @@ export class CategoryService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/category/{id}',
+      url: '/api/v1/category/{id}',
       path: {
         'id': id,
       },
@@ -176,7 +176,7 @@ export class CategoryService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'DELETE',
-      url: '/api/category/{id}',
+      url: '/api/v1/category/{id}',
       path: {
         'id': id,
       },
@@ -218,7 +218,7 @@ export class CategoryService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/category/{id}/courses',
+      url: '/api/v1/category/{id}/courses',
       path: {
         'id': id,
       },

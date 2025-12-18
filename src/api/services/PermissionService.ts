@@ -29,7 +29,7 @@ export class PermissionService {
   }> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/permission',
+      url: '/api/v1/permission',
       body: requestBody,
       mediaType: 'application/json',
     });
@@ -73,7 +73,7 @@ export class PermissionService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/permission',
+      url: '/api/v1/permission',
       query: {
         'page': page,
         'pageSize': pageSize,
@@ -103,7 +103,7 @@ export class PermissionService {
   }> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/permission/{id}',
+      url: '/api/v1/permission/{id}',
       path: {
         'id': id,
       },
@@ -132,7 +132,7 @@ export class PermissionService {
   }> {
     return __request(OpenAPI, {
       method: 'PATCH',
-      url: '/api/permission/{id}',
+      url: '/api/v1/permission/{id}',
       path: {
         'id': id,
       },
@@ -161,7 +161,7 @@ export class PermissionService {
   }> {
     return __request(OpenAPI, {
       method: 'DELETE',
-      url: '/api/permission/{id}',
+      url: '/api/v1/permission/{id}',
       path: {
         'id': id,
       },
